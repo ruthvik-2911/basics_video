@@ -698,19 +698,26 @@
         async function speak(text, button = null, isAuto = false) {
             if (isAuto && !ttsToggle.checked) return;
             
-            // If already playing audio for this button, stop it
-            if (currentAudio && currentlySpeakingBtn === button && button !== null) {
-                currentAudio.pause();
-                currentAudio = null;
+            // IF ALREADY SPEAKING / PLAYING OR FETCHING FOR THIS BUTTON -> STOP IT IMMEDIATELY!
+            if (currentlySpeakingBtn === button && button !== null) {
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                    currentAudio = null;
+                }
+                if (window.speechSynthesis) {
+                    window.speechSynthesis.cancel();
+                }
                 button.innerText = '🔊';
                 button.title = 'Replay answer';
                 currentlySpeakingBtn = null;
                 return;
             }
 
-            // Stop whatever is currently playing
+            // Stop whatever is currently playing from previous messages
             if (currentAudio) {
                 currentAudio.pause();
+                currentAudio.currentTime = 0;
                 currentAudio = null;
             }
             if (window.speechSynthesis) {
@@ -731,48 +738,58 @@
             try {
                 const formData = new FormData();
                 formData.append('text', text);
-                formData.append('voice', 'en-US-JennyNeural'); // Natural Azure Neural Voice
+                formData.append('voice', 'en-US-JennyNeural');
 
                 const res = await fetch('/api/tts', {
                     method: 'POST',
                     body: formData
                 });
 
+                // Abort if user clicked stop while fetch was in progress
+                if (currentlySpeakingBtn !== button) {
+                    return;
+                }
+
                 if (!res.ok) throw new Error("Azure TTS failed");
 
                 const blob = await res.blob();
                 const audioUrl = URL.createObjectURL(blob);
-                currentAudio = new Audio(audioUrl);
+                const audio = new Audio(audioUrl);
+                currentAudio = audio;
 
-                currentAudio.onended = () => {
+                audio.onended = () => {
                     if (currentlySpeakingBtn === button) {
                         button.innerText = '🔊';
                         button.title = 'Replay answer';
                         currentlySpeakingBtn = null;
+                        currentAudio = null;
                     }
                 };
 
-                currentAudio.onerror = () => {
+                audio.onerror = () => {
                     if (currentlySpeakingBtn === button) {
                         button.innerText = '🔊';
                         button.title = 'Replay answer';
                         currentlySpeakingBtn = null;
+                        currentAudio = null;
                     }
                 };
 
-                await currentAudio.play();
+                await audio.play();
             } catch (err) {
                 console.warn("Azure TTS fallback to Web Speech API", err);
-                const utterance = new SpeechSynthesisUtterance(text);
-                if (button) {
-                    utterance.onend = () => {
-                        if (currentlySpeakingBtn === button) {
-                            button.innerText = '🔊';
-                            currentlySpeakingBtn = null;
-                        }
-                    };
+                if (currentlySpeakingBtn === button) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    if (button) {
+                        utterance.onend = () => {
+                            if (currentlySpeakingBtn === button) {
+                                button.innerText = '🔊';
+                                currentlySpeakingBtn = null;
+                            }
+                        };
+                    }
+                    window.speechSynthesis.speak(utterance);
                 }
-                window.speechSynthesis.speak(utterance);
             }
         }
 

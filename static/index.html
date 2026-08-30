@@ -506,6 +506,7 @@
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
                 <h2 style="margin: 0;">Insight Playground</h2>
                 <div style="display: flex; gap: 0.5rem;">
+                    <button id="new-chat-btn" title="Start a fresh chat thread" class="tab-btn" style="background: #ffffff; border: 1px solid #cbd5e1; color: var(--shell-red); font-weight: 600;">+ New Chat</button>
                     <button id="view-chat-tab" class="tab-btn active">💬 Insight Chat</button>
                     <button id="view-graph-tab" class="tab-btn">🕸️ Knowledge Graph</button>
                 </div>
@@ -564,9 +565,47 @@
         // View Tab Switcher: Chat vs Knowledge Graph
         const viewChatTab = document.getElementById('view-chat-tab');
         const viewGraphTab = document.getElementById('view-graph-tab');
+        const newChatBtn = document.getElementById('new-chat-btn');
         const chatView = document.getElementById('chat-view');
         const graphView = document.getElementById('graph-view');
         let networkInstance = null;
+
+        if (newChatBtn) {
+            newChatBtn.addEventListener('click', () => {
+                // Stop any audio currently playing
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                    currentAudio = null;
+                }
+                if (window.speechSynthesis) {
+                    window.speechSynthesis.cancel();
+                }
+                if (currentlySpeakingBtn) {
+                    currentlySpeakingBtn.innerText = '🔊';
+                    currentlySpeakingBtn = null;
+                }
+
+                // Clear chat history & restore welcome message
+                chatHistory.innerHTML = `
+                    <div class="message bot">
+                        <div class="bubble">
+                            Hello! Once your video finishes processing and the status reads "READY", you can ask me anything about what happens in the video.
+                        </div>
+                    </div>
+                `;
+                questionInput.value = '';
+                questionInput.focus();
+
+                // Switch to Chat View if currently on Graph view
+                if (viewChatTab && viewGraphTab) {
+                    viewChatTab.classList.add('active');
+                    viewGraphTab.classList.remove('active');
+                    chatView.style.display = 'flex';
+                    graphView.style.display = 'none';
+                }
+            });
+        }
 
         if (viewChatTab && viewGraphTab) {
             viewChatTab.addEventListener('click', () => {

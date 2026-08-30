@@ -30,6 +30,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response
 
 from ingest import ingest_video
+import knowledge_graph
 from query import answer_question
 
 app = FastAPI(title="Video Chatbot")
@@ -235,9 +236,6 @@ async def text_to_speech(text: str = Form(...), voice: str = Form("en-US-JennyNe
         {clean_text}
     </voice>
 </speak>"""
-
-import ingest
-import knowledge_graph
 
     try:
         resp = requests.post(url, headers=headers, data=ssml.encode("utf-8"), timeout=15)

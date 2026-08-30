@@ -248,7 +248,16 @@ async def text_to_speech(text: str = Form(...), voice: str = Form("en-US-JennyNe
 
 @app.get("/api/graph")
 def get_knowledge_graph():
-    return knowledge_graph.load_graph()
+    graph = knowledge_graph.load_graph()
+    if not graph.get("nodes"):
+        threading.Thread(target=knowledge_graph.populate_from_registry).start()
+    return graph
+
+
+@app.post("/api/graph/sync")
+def sync_knowledge_graph():
+    threading.Thread(target=knowledge_graph.populate_from_registry).start()
+    return {"status": "syncing", "message": "Extracting Knowledge Graph for existing videos..."}
 
 
 # ---------------------------------------------------------------------------

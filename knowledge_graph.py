@@ -38,6 +38,35 @@ def save_graph(graph_data: dict):
         json.dump(graph_data, f, indent=2)
 
 
+def populate_from_registry():
+    """Populates Knowledge Graph for all existing videos in videos_registry.json."""
+    registry_file = os.path.join(os.path.dirname(__file__), "videos_registry.json")
+    if not os.path.exists(registry_file):
+        return
+    try:
+        with open(registry_file, "r", encoding="utf-8") as f:
+            registry = json.load(f)
+    except Exception:
+        return
+
+    from video_indexer_client import VideoIndexerClient
+    from merge_and_chunk import build_chunks
+
+    vi = VideoIndexerClient()
+    for local_id, info in registry.items():
+        vi_video_id = info.get("vi_video_id")
+        display_name = info.get("display_name", "Untitled")
+        if not vi_video_id:
+            continue
+        try:
+            print(f"[KnowledgeGraph] Indexing existing video: '{display_name}' ({vi_video_id})...")
+            insights = vi.wait_for_processing(vi_video_id, timeout_seconds=10)
+            chunks = build_chunks(vi_video_id, insights)
+            extract_and_merge(vi_video_id, display_name, chunks)
+        except Exception as e:
+            print(f"[KnowledgeGraph] Skipping {display_name}: {e}")
+
+
 def extract_and_merge(video_id: str, video_title: str, chunks: list) -> dict:
     """Extracts key entities & relations from video chunks and merges into knowledge_graph.json."""
     graph = load_graph()

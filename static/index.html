@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Marked.js for markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Vis-Network for 100% Free Interactive Knowledge Graph -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -116,6 +118,34 @@
 
         .container.sidebar-collapsed .sidebar-toggle-handle {
             left: 0px;
+        }
+
+        /* Tab Switcher for Chat vs Knowledge Graph */
+        .tab-btn {
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+            padding: 0.4rem 0.85rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: none;
+        }
+
+        .tab-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: var(--shell-red);
+            border-color: var(--shell-red);
+            box-shadow: 0 2px 4px rgba(221, 29, 33, 0.1);
         }
 
         h2 {
@@ -473,25 +503,42 @@
 
         <!-- RIGHT CHAT AREA -->
         <div class="glass-panel chat-container">
-            <h2>Insight Chat</h2>
-            
-            <div class="chat-history" id="chat-history">
-                <!-- Welcome message -->
-                <div class="message bot">
-                    <div class="bubble">
-                        Hello! Once your video finishes processing and the status reads "READY", you can ask me anything about what happens in the video.
-                    </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                <h2 style="margin: 0;">Insight Playground</h2>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="view-chat-tab" class="tab-btn active">💬 Insight Chat</button>
+                    <button id="view-graph-tab" class="tab-btn">🕸️ Knowledge Graph</button>
                 </div>
             </div>
             
-            <div class="typing-indicator" id="typing-indicator">
-                <span></span><span></span><span></span>
+            <!-- CHAT VIEW CONTAINER -->
+            <div id="chat-view" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+                <div class="chat-history" id="chat-history">
+                    <!-- Welcome message -->
+                    <div class="message bot">
+                        <div class="bubble">
+                            Hello! Once your video finishes processing and the status reads "READY", you can ask me anything about what happens in the video.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="typing-indicator" id="typing-indicator">
+                    <span></span><span></span><span></span>
+                </div>
+
+                <form id="chat-form" class="chat-input-area">
+                    <input type="text" id="question-input" placeholder="Ask a question about the video..." disabled required autocomplete="off">
+                    <button type="submit" id="send-btn" disabled>Send</button>
+                </form>
             </div>
 
-            <form id="chat-form" class="chat-input-area">
-                <input type="text" id="question-input" placeholder="Ask a question about the video..." disabled required autocomplete="off">
-                <button type="submit" id="send-btn" disabled>Send</button>
-            </form>
+            <!-- KNOWLEDGE GRAPH VIEW CONTAINER -->
+            <div id="graph-view" style="display: none; flex: 1; min-height: 0; width: 100%; border-radius: 12px; background: #ffffff; border: 1px solid #cbd5e1; position: relative; overflow: hidden;">
+                <div id="graph-canvas" style="width: 100%; height: 100%;"></div>
+                <div style="position: absolute; bottom: 12px; left: 12px; background: rgba(255,255,255,0.92); padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; border: 1px solid #cbd5e1; color: #475569; pointer-events: none; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                    🔴 Red: Videos &nbsp;|&nbsp; 🔵 Blue: Topics &nbsp;|&nbsp; 🟢 Green: Tools &nbsp;|&nbsp; 🟡 Yellow: Actions
+                </div>
+            </div>
         </div>
     </div>
 
@@ -512,6 +559,77 @@
                     handleArrow.innerText = '◀';
                 }
             });
+        }
+
+        // View Tab Switcher: Chat vs Knowledge Graph
+        const viewChatTab = document.getElementById('view-chat-tab');
+        const viewGraphTab = document.getElementById('view-graph-tab');
+        const chatView = document.getElementById('chat-view');
+        const graphView = document.getElementById('graph-view');
+        let networkInstance = null;
+
+        if (viewChatTab && viewGraphTab) {
+            viewChatTab.addEventListener('click', () => {
+                viewChatTab.classList.add('active');
+                viewGraphTab.classList.remove('active');
+                chatView.style.display = 'flex';
+                graphView.style.display = 'none';
+            });
+
+            viewGraphTab.addEventListener('click', async () => {
+                viewGraphTab.classList.add('active');
+                viewChatTab.classList.remove('active');
+                chatView.style.display = 'none';
+                graphView.style.display = 'flex';
+                await renderKnowledgeGraph();
+            });
+        }
+
+        async function renderKnowledgeGraph() {
+            try {
+                const res = await fetch('/api/graph');
+                if (!res.ok) return;
+                const graphData = await res.json();
+
+                const canvasContainer = document.getElementById('graph-canvas');
+                if (!canvasContainer) return;
+
+                const data = {
+                    nodes: new vis.DataSet(graphData.nodes || []),
+                    edges: new vis.DataSet(graphData.edges || [])
+                };
+
+                const options = {
+                    nodes: {
+                        borderWidth: 2,
+                        shadow: true
+                    },
+                    edges: {
+                        width: 1.5,
+                        shadow: false,
+                        smooth: { type: 'continuous' }
+                    },
+                    physics: {
+                        stabilization: true,
+                        barnesHut: {
+                            gravitationalConstant: -3000,
+                            springLength: 120
+                        }
+                    },
+                    interaction: {
+                        hover: true,
+                        tooltipDelay: 100,
+                        zoomView: true
+                    }
+                };
+
+                if (networkInstance) {
+                    networkInstance.destroy();
+                }
+                networkInstance = new vis.Network(canvasContainer, data, options);
+            } catch (err) {
+                console.error("Failed to render Knowledge Graph:", err);
+            }
         }
 
         let currentJobId = 'all';

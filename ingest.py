@@ -16,6 +16,7 @@ import sys
 import uuid
 
 import blob_storage
+import knowledge_graph
 import search_index
 from video_indexer_client import VideoIndexerClient
 from merge_and_chunk import build_chunks
@@ -41,30 +42,36 @@ def ingest_video(local_path: str, display_name: str) -> tuple[str, str]:
     video_id_local = str(uuid.uuid4())  # our own tracking id for the blob path
     blob_name = f"{video_id_local}.mp4"
 
-    print(f"[1/6] Uploading raw video to Blob Storage...")
+    print(f"[1/7] Uploading raw video to Blob Storage...")
     _with_retry(lambda: blob_storage.upload_raw_video(local_path, blob_name))
 
     sas_url = blob_storage.get_blob_sas_url(blob_name)
 
-    print(f"[2/6] Submitting video to Video Indexer via Azure Blob URL...")
+    print(f"[2/7] Submitting video to Video Indexer via Azure Blob URL...")
     vi = VideoIndexerClient()
     vi_video_id = _with_retry(lambda: vi.upload_video(video_name=display_name, video_url=sas_url))
 
-    print(f"[3/6] Waiting for Video Indexer to finish processing (this can take a few minutes)...")
+    print(f"[3/7] Waiting for Video Indexer to finish processing (this can take a few minutes)...")
     insights = vi.wait_for_processing(vi_video_id)
 
-    print(f"[4/6] Building overlapping chunks from transcript + OCR...")
+    print(f"[4/7] Building overlapping chunks from transcript + OCR...")
     chunks = build_chunks(vi_video_id, insights)
     print(f"      -> {len(chunks)} chunks built")
 
-    print(f"[5/6] Resolving keyframe thumbnails and uploading images to Blob Storage...")
+    print(f"[5/7] Resolving keyframe thumbnails and uploading images to Blob Storage...")
     for chunk in chunks:
         for kf in chunk.keyframes:
             image_bytes = _with_retry(lambda: vi.get_thumbnail_bytes(vi_video_id, kf.thumbnail_id))
             _with_retry(lambda: blob_storage.upload_keyframe_image(vi_video_id, kf.thumbnail_id, image_bytes))
 
-    print(f"[6/6] Embedding chunks and pushing to Azure AI Search...")
+    print(f"[6/7] Embedding chunks and pushing to Azure AI Search...")
     _with_retry(lambda: search_index.upload_chunks(chunks))
+
+    print(f"[7/7] Extracting Knowledge Graph entities & relationships...")
+    try:
+        knowledge_graph.extract_and_merge(vi_video_id, display_name, chunks)
+    except Exception as e:
+        print(f"      Warning: Knowledge Graph step skipped ({e})")
 
     print(f"Done. Video Indexer video_id={vi_video_id}, blob raw video name={blob_name}")
     return vi_video_id, blob_name

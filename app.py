@@ -236,6 +236,9 @@ async def text_to_speech(text: str = Form(...), voice: str = Form("en-US-JennyNe
     </voice>
 </speak>"""
 
+import ingest
+import knowledge_graph
+
     try:
         resp = requests.post(url, headers=headers, data=ssml.encode("utf-8"), timeout=15)
         resp.raise_for_status()
@@ -243,6 +246,11 @@ async def text_to_speech(text: str = Form(...), voice: str = Form("en-US-JennyNe
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(500, f"Azure TTS failed: {e}")
+
+
+@app.get("/api/graph")
+def get_knowledge_graph():
+    return knowledge_graph.load_graph()
 
 
 # ---------------------------------------------------------------------------

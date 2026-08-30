@@ -1,0 +1,642 @@
+# FULL PROJECT CONTEXT
+This file contains the complete code and setup for the Video Chatbot Ingestion & Query Pipeline.
+Provide this file to any new AI chat session to give it full context of the project.
+
+\n\n============================================================\nFILE: readme.md\n============================================================\n\n```markdown\n# Video Chatbot — Ingestion & Query Pipeline
+
+This is the automated version of everything we did manually in the Azure
+Portal and Video Indexer web UI. Once this is running, uploading a video and
+asking a question needs zero manual clicking.
+
+## What each file does
+
+| File | Purpose |
+|---|---|
+| `config.py` | Reads all settings from environment variables (see `.env.example`) |
+| `video_indexer_client.py` | Talks to the Video Indexer API: uploads video, polls for completion, fetches insights JSON, fetches keyframe images |
+| `blob_storage.py` | Uploads raw videos and keyframe images to your `videochatbotstore1` storage account |
+| `merge_and_chunk.py` | Merges transcript + OCR into one timeline, builds overlapping 15s chunks, links each chunk to its nearby keyframes |
+| `search_index.py` | Creates the Azure AI Search index, embeds chunk text locally (no Azure OpenAI needed), uploads/searches |
+| `ingest.py` | Orchestrates the full ingestion pipeline for one video — **run this when a video is uploaded** |
+| `query.py` | Orchestrates answering one question — retrieval, exact-timestamp frame grab, leaves a slot for your vision model call |
+
+## Setup
+
+1. `pip install -r requirements.txt`
+2. `ffmpeg` must be installed and on your PATH (used for the exact-timestamp frame grab).
+3. Copy `.env.example` to `.env` and fill in every value:
+   - `VI_*` values come from your `video-chatbot-indexer29` resource's Overview page in the Azure Portal (Account ID, Subscription ID, etc.)
+   - `BLOB_CONNECTION_STRING` comes from your `videochatbotstore1` storage account → Access keys
+   - `SEARCH_ENDPOINT` / `SEARCH_ADMIN_KEY` come from an Azure AI Search resource (create one — F0 free tier is fine to start; search "Azure AI Search" in the Portal same way we created the other resources)
+4. Load the `.env` file before running (e.g. `python-dotenv`, or `export $(cat .env | xargs)` on Linux/Mac).
+5. Authenticate for Azure AD: run `az login` once locally, or set up a managed identity/service principal in production. This is what `DefaultAzureCredential` in `video_indexer_client.py` uses.
+
+## Running ingestion
+
+```bash
+python ingest.py /path/to/your/video.mp4 "Hotel Booking Walkthrough"
+```
+
+This runs the exact 6 steps we validated manually in the portal, just automated:
+upload → index → wait → chunk → resolve thumbnails → push to search.
+
+## Running a query
+
+```python
+from query import answer_question
+
+result = answer_question(
+    "what do I do at the payment step?",
+    video_blob_name="<the blob_name printed by ingest.py>",
+)
+print(result["text"])
+print(result["image_path"])   # exact-timestamp frame, ready to show in the UI
+print(result["timestamp"])
+```
+
+## Still to wire up
+
+- `query.py` has two placeholder comments: the vision-model call (send
+  `context_text` + `frame_path` + the question to a vision-capable model)
+  and text-to-speech (send the returned answer text to Azure AI Speech or
+  another TTS provider). These were left as plug-in points since the choice
+  of provider is yours to make.
+- A thin web/API layer around `ingest_video()` and `answer_question()` for
+  your actual chatbot UI to call.\n```\n\n\n============================================================\nFILE: requirements.txt\n============================================================\n\n```text\nrequests
+azure-identity
+azure-storage-blob
+azure-search-documents
+sentence-transformers
+python-dotenv
+\n```\n\n\n============================================================\nFILE: .env.example\n============================================================\n\n```text\n# .env.example
+\n```\n\n\n============================================================\nFILE: config.py\n============================================================\n\n```python\n# config.py
+"""
+Central configuration. All values come from environment variables so no
+secrets live in code. Copy `.env.example` to `.env` and fill in your values,
+then load it (e.g. with python-dotenv) before running anything.
+"""
+
+import os
+
+# --- Video Indexer (ARM account) ---
+VI_SUBSCRIPTION_ID = os.environ["VI_SUBSCRIPTION_ID"]        # Azure subscription ID
+VI_RESOURCE_GROUP = os.environ["VI_RESOURCE_GROUP"]          # e.g. "rg-video-chatbot"
+VI_ACCOUNT_NAME = os.environ["VI_ACCOUNT_NAME"]               # e.g. "video-chatbot-indexer29"
+VI_ACCOUNT_ID = os.environ["VI_ACCOUNT_ID"]                   # the "Account ID" shown on the resource Overview page
+VI_LOCATION = os.environ.get("VI_LOCATION", "eastus")         # ARM region slug (lowercase, no spaces)
+
+# --- Azure Blob Storage ---
+BLOB_CONNECTION_STRING = os.environ["BLOB_CONNECTION_STRING"]
+BLOB_CONTAINER_RAW_VIDEOS = os.environ.get("BLOB_CONTAINER_RAW_VIDEOS", "raw-videos")
+BLOB_CONTAINER_KEYFRAMES = os.environ.get("BLOB_CONTAINER_KEYFRAMES", "key-frames")
+
+# --- Azure AI Search ---
+SEARCH_ENDPOINT = os.environ["SEARCH_ENDPOINT"]                # https://<name>.search.windows.net
+SEARCH_ADMIN_KEY = os.environ["SEARCH_ADMIN_KEY"]
+SEARCH_INDEX_NAME = os.environ.get("SEARCH_INDEX_NAME", "video-chunks")
+
+# --- Chunking ---
+CHUNK_WINDOW_SECONDS = 15
+CHUNK_STRIDE_SECONDS = 7.5   # overlap = window - stride
+
+# --- Embedding model (local, free, no Azure OpenAI dependency) ---
+EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"   # 384-dim, runs locally via sentence-transformers
+EMBEDDING_DIM = 384\n```\n\n\n============================================================\nFILE: video_indexer_client.py\n============================================================\n\n```python\n# video_indexer_client.py
+"""
+Wraps the Azure AI Video Indexer data-plane API for an ARM-based account.
+
+Auth flow (ARM accounts only, this is different from trial accounts):
+  1. Get an ARM bearer token via Azure AD (DefaultAzureCredential handles
+     `az login`, managed identity, or environment credentials automatically).
+  2. Exchange that for a Video Indexer *access token* by calling the ARM
+     `generateAccessToken` endpoint.
+  3. Use that access token on every call to api.videoindexer.ai.
+
+This mirrors exactly what the "Explore the portal" web UI does under the
+hood -- we're just doing it from code instead of clicking through it.
+"""
+
+import time
+import requests
+from azure.identity import DefaultAzureCredential
+
+import config
+
+ARM_BASE = "https://management.azure.com"
+VI_API_BASE = "https://api.videoindexer.ai"
+
+
+class VideoIndexerClient:
+    def __init__(self):
+        self._credential = DefaultAzureCredential()
+        self._vi_access_token = None
+        self._vi_token_expiry = 0
+
+    # ---- auth ----
+
+    def _get_arm_token(self) -> str:
+        token = self._credential.get_token("https://management.azure.com/.default")
+        return token.token
+
+    def _get_vi_access_token(self, permission: str = "Contributor") -> str:
+        """Fetch (and cache) a Video Indexer data-plane access token."""
+        if self._vi_access_token and time.time() < self._vi_token_expiry:
+            return self._vi_access_token
+
+        arm_token = self._get_arm_token()
+        url = (
+            f"{ARM_BASE}/subscriptions/{config.VI_SUBSCRIPTION_ID}"
+            f"/resourceGroups/{config.VI_RESOURCE_GROUP}"
+            f"/providers/Microsoft.VideoIndexer/accounts/{config.VI_ACCOUNT_NAME}"
+            f"/generateAccessToken?api-version=2022-08-01"
+        )
+        resp = requests.post(
+            url,
+            headers={"Authorization": f"Bearer {arm_token}"},
+            json={"permissionType": permission, "scope": "Account"},
+        )
+        resp.raise_for_status()
+        self._vi_access_token = resp.json()["accessToken"]
+        self._vi_token_expiry = time.time() + 55 * 60  # tokens last ~1hr, refresh a bit early
+        return self._vi_access_token
+
+    # ---- video lifecycle ----
+
+    def upload_video(self, file_path: str, video_name: str, language: str = "en-US") -> str:
+        """Uploads a local video file and kicks off indexing. Returns the videoId."""
+        access_token = self._get_vi_access_token()
+        url = (
+            f"{VI_API_BASE}/{config.VI_LOCATION}/Accounts/{config.VI_ACCOUNT_ID}/Videos"
+        )
+        params = {
+            "accessToken": access_token,
+            "name": video_name,
+            "privacy": "Private",
+            "language": language,
+            "indexingPreset": "Default",  # matches "Standard video + audio" in the portal
+        }
+        with open(file_path, "rb") as f:
+            files = {"file": (video_name, f, "video/mp4")}
+            resp = requests.post(url, params=params, files=files)
+        resp.raise_for_status()
+        return resp.json()["id"]
+
+    def wait_for_processing(self, video_id: str, poll_seconds: int = 10, timeout_seconds: int = 3600) -> dict:
+        """Polls until indexing finishes. Returns the full insights JSON."""
+        access_token = self._get_vi_access_token()
+        url = (
+            f"{VI_API_BASE}/{config.VI_LOCATION}/Accounts/{config.VI_ACCOUNT_ID}"
+            f"/Videos/{video_id}/Index"
+        )
+        deadline = time.time() + timeout_seconds
+        while time.time() < deadline:
+            resp = requests.get(url, params={"accessToken": access_token})
+            resp.raise_for_status()
+            data = resp.json()
+            state = data.get("state")
+            if state == "Processed":
+                return data
+            if state == "Failed":
+                raise RuntimeError(f"Video Indexer failed to process video {video_id}: {data}")
+            time.sleep(poll_seconds)
+        raise TimeoutError(f"Video {video_id} did not finish processing within {timeout_seconds}s")
+
+    def get_thumbnail_bytes(self, video_id: str, thumbnail_id: str) -> bytes:
+        """Fetches the actual JPEG bytes for a keyframe thumbnailId."""
+        access_token = self._get_vi_access_token()
+        url = (
+            f"{VI_API_BASE}/{config.VI_LOCATION}/Accounts/{config.VI_ACCOUNT_ID}"
+            f"/Videos/{video_id}/Thumbnails/{thumbnail_id}"
+        )
+        resp = requests.get(url, params={"accessToken": access_token, "format": "Jpeg"})
+        resp.raise_for_status()
+        return resp.content\n```\n\n\n============================================================\nFILE: blob_storage.py\n============================================================\n\n```python\n# blob_storage.py
+from azure.storage.blob import BlobServiceClient
+
+import config
+
+_blob_service = None
+
+
+def _get_service() -> BlobServiceClient:
+    global _blob_service
+    if _blob_service is None:
+        _blob_service = BlobServiceClient.from_connection_string(config.BLOB_CONNECTION_STRING)
+    return _blob_service
+
+
+def upload_raw_video(local_path: str, blob_name: str) -> str:
+    client = _get_service().get_blob_client(config.BLOB_CONTAINER_RAW_VIDEOS, blob_name)
+    with open(local_path, "rb") as f:
+        client.upload_blob(f, overwrite=True)
+    return client.url
+
+
+def upload_keyframe_image(video_id: str, thumbnail_id: str, image_bytes: bytes) -> str:
+    blob_name = f"{video_id}/{thumbnail_id}.jpg"
+    client = _get_service().get_blob_client(config.BLOB_CONTAINER_KEYFRAMES, blob_name)
+    client.upload_blob(image_bytes, overwrite=True, content_type="image/jpeg")
+    return client.url
+
+
+def download_video_to_temp(blob_name: str, dest_path: str):
+    """Used later at query time for the exact on-demand ffmpeg frame grab."""
+    client = _get_service().get_blob_client(config.BLOB_CONTAINER_RAW_VIDEOS, blob_name)
+    with open(dest_path, "wb") as f:
+        f.write(client.download_blob().readall())\n```\n\n\n============================================================\nFILE: merge_and_chunk.py\n============================================================\n\n```python\n# merge_and_chunk.py
+"""
+Turns raw Video Indexer insights JSON into search-ready chunks.
+
+Pipeline:
+  1. Merge transcript + OCR entries into one time-sorted timeline.
+  2. Slide overlapping windows across that timeline (so no sentence/label
+     gets cut at a boundary and silently dropped).
+  3. For each window, attach every keyframe whose timestamp falls inside it
+     (not just the single nearest one).
+"""
+
+from dataclasses import dataclass, field
+
+import config
+
+
+def _time_to_seconds(t: str) -> float:
+    """Video Indexer times look like '0:01:14.72' -> convert to seconds."""
+    h, m, s = t.split(":")
+    return int(h) * 3600 + int(m) * 60 + float(s)
+
+
+@dataclass
+class TimelineEntry:
+    start: float
+    end: float
+    text: str
+    kind: str  # "speech" or "ocr"
+
+
+@dataclass
+class KeyframeRef:
+    time: float
+    thumbnail_id: str
+
+
+@dataclass
+class Chunk:
+    video_id: str
+    start: float
+    end: float
+    text: str
+    keyframes: list = field(default_factory=list)  # list[KeyframeRef]
+
+
+def build_timeline(insights: dict) -> list:
+    """Merge transcript + OCR entries into one time-sorted list."""
+    video = insights["videos"][0]["insights"]
+    entries = []
+
+    for item in video.get("transcript", []):
+        for inst in item["instances"]:
+            entries.append(TimelineEntry(
+                start=_time_to_seconds(inst["start"]),
+                end=_time_to_seconds(inst["end"]),
+                text=item["text"],
+                kind="speech",
+            ))
+
+    for item in video.get("ocr", []):
+        for inst in item["instances"]:
+            entries.append(TimelineEntry(
+                start=_time_to_seconds(inst["start"]),
+                end=_time_to_seconds(inst["end"]),
+                text=item["text"],
+                kind="ocr",
+            ))
+
+    entries.sort(key=lambda e: e.start)
+    return entries
+
+
+def extract_keyframes(insights: dict) -> list:
+    """Flatten every shot's keyframes into a single time-sorted list."""
+    video = insights["videos"][0]["insights"]
+    frames = []
+    for shot in video.get("shots", []):
+        for kf in shot.get("keyFrames", []):
+            for inst in kf["instances"]:
+                frames.append(KeyframeRef(
+                    time=_time_to_seconds(inst["start"]),
+                    thumbnail_id=inst["thumbnailId"],
+                ))
+    frames.sort(key=lambda f: f.time)
+    return frames
+
+
+def build_chunks(video_id: str, insights: dict) -> list:
+    """
+    Slide overlapping windows across the merged timeline. Each chunk's text
+    combines every timeline entry whose window overlaps it (deduplicated,
+    speech and OCR both included) and every keyframe whose timestamp falls
+    inside the window.
+    """
+    timeline = build_timeline(insights)
+    keyframes = extract_keyframes(insights)
+
+    duration = _time_to_seconds(insights["videos"][0]["insights"]["duration"])
+
+    window = config.CHUNK_WINDOW_SECONDS
+    stride = config.CHUNK_STRIDE_SECONDS
+
+    chunks = []
+    t = 0.0
+    while t < duration:
+        window_start, window_end = t, t + window
+
+        window_entries = [
+            e for e in timeline
+            if e.start < window_end and e.end > window_start
+        ]
+        # De-dupe identical text lines that repeat across overlapping windows' source data
+        seen = set()
+        lines = []
+        for e in window_entries:
+            key = (e.kind, e.text)
+            if key not in seen:
+                seen.add(key)
+                prefix = "[speech]" if e.kind == "speech" else "[on-screen]"
+                lines.append(f"{prefix} {e.text}")
+
+        window_keyframes = [k for k in keyframes if window_start <= k.time < window_end]
+
+        if lines:  # skip empty windows (e.g. pure silence with no OCR)
+            chunks.append(Chunk(
+                video_id=video_id,
+                start=window_start,
+                end=window_end,
+                text="\n".join(lines),
+                keyframes=window_keyframes,
+            ))
+
+        t += stride
+
+    return chunks\n```\n\n\n============================================================\nFILE: search_index.py\n============================================================\n\n```python\n# search_index.py
+"""
+Creates (if needed) the Azure AI Search index and uploads chunks into it.
+Embeddings are generated locally via sentence-transformers, so this never
+depends on Azure OpenAI approval or billing.
+"""
+
+from azure.core.credentials import AzureKeyCredential
+from azure.search.documents import SearchClient
+from azure.search.documents.models import VectorizedQuery
+from azure.search.documents.indexes import SearchIndexClient
+from azure.search.documents.indexes.models import (
+    SearchIndex, SimpleField, SearchableField, SearchFieldDataType,
+    VectorSearch, HnswAlgorithmConfiguration, VectorSearchProfile,
+    SearchField,
+)
+from sentence_transformers import SentenceTransformer
+
+import config
+
+_embedder = None
+
+
+def _get_embedder():
+    global _embedder
+    if _embedder is None:
+        _embedder = SentenceTransformer(config.EMBEDDING_MODEL_NAME)
+    return _embedder
+
+
+def embed_text(text: str) -> list:
+    return _get_embedder().encode(text).tolist()
+
+
+def ensure_index_exists():
+    index_client = SearchIndexClient(
+        endpoint=config.SEARCH_ENDPOINT,
+        credential=AzureKeyCredential(config.SEARCH_ADMIN_KEY),
+    )
+    existing = [i.name for i in index_client.list_indexes()]
+    if config.SEARCH_INDEX_NAME in existing:
+        return
+
+    fields = [
+        SimpleField(name="id", type=SearchFieldDataType.String, key=True),
+        SimpleField(name="video_id", type=SearchFieldDataType.String, filterable=True),
+        SimpleField(name="source_type", type=SearchFieldDataType.String, filterable=True),
+        SimpleField(name="start_time", type=SearchFieldDataType.Double, filterable=True, sortable=True),
+        SimpleField(name="end_time", type=SearchFieldDataType.Double, filterable=True),
+        SearchableField(name="text", type=SearchFieldDataType.String),
+        SimpleField(name="keyframe_thumbnail_ids", type=SearchFieldDataType.Collection(SearchFieldDataType.String)),
+        SearchField(
+            name="text_vector",
+            type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
+            searchable=True,
+            vector_search_dimensions=config.EMBEDDING_DIM,
+            vector_search_profile_name="default-profile",
+        ),
+    ]
+
+    vector_search = VectorSearch(
+        algorithms=[HnswAlgorithmConfiguration(name="default-hnsw")],
+        profiles=[VectorSearchProfile(name="default-profile", algorithm_configuration_name="default-hnsw")],
+    )
+
+    index = SearchIndex(name=config.SEARCH_INDEX_NAME, fields=fields, vector_search=vector_search)
+    index_client.create_index(index)
+
+
+def upload_chunks(chunks: list):
+    """chunks: list[merge_and_chunk.Chunk]"""
+    ensure_index_exists()
+    search_client = SearchClient(
+        endpoint=config.SEARCH_ENDPOINT,
+        index_name=config.SEARCH_INDEX_NAME,
+        credential=AzureKeyCredential(config.SEARCH_ADMIN_KEY),
+    )
+
+    docs = []
+    for i, chunk in enumerate(chunks):
+        docs.append({
+            "id": f"{chunk.video_id}-{i}",
+            "video_id": chunk.video_id,
+            "source_type": "video",
+            "start_time": chunk.start,
+            "end_time": chunk.end,
+            "text": chunk.text,
+            "keyframe_thumbnail_ids": [k.thumbnail_id for k in chunk.keyframes],
+            "text_vector": embed_text(chunk.text),
+        })
+
+    # Search accepts up to 1000 docs per batch; chunk lists are small per video
+    # but this keeps it safe if you ever batch multiple videos together.
+    for i in range(0, len(docs), 1000):
+        search_client.upload_documents(documents=docs[i:i + 1000])
+
+
+def search_top_chunks(query: str, top_k: int = 3) -> list:
+    """Returns the top_k matching chunk documents for a user question."""
+    search_client = SearchClient(
+        endpoint=config.SEARCH_ENDPOINT,
+        index_name=config.SEARCH_INDEX_NAME,
+        credential=AzureKeyCredential(config.SEARCH_ADMIN_KEY),
+    )
+    query_vector = embed_text(query)
+    vector_query = VectorizedQuery(
+        vector=query_vector,
+        k_nearest_neighbors=top_k,
+        fields="text_vector",
+    )
+    results = search_client.search(
+        search_text=None,
+        vector_queries=[vector_query],
+        select=["id", "video_id", "text", "start_time", "end_time", "keyframe_thumbnail_ids"],
+    )
+    return list(results)\n```\n\n\n============================================================\nFILE: ingest.py\n============================================================\n\n```python\n"""
+End-to-end ingestion for one video. This replaces every manual step we did
+in the Video Indexer portal with code:
+
+    upload -> wait for processing -> fetch insights -> resolve keyframe
+    images -> merge transcript+OCR -> chunk -> embed -> push to search
+
+Usage:
+    python ingest.py /path/to/video.mp4 "My Video Title"
+"""
+
+from dotenv import load_dotenv
+load_dotenv()
+
+import sys
+import uuid
+import json
+
+import blob_storage
+import search_index
+from video_indexer_client import VideoIndexerClient
+from merge_and_chunk import build_chunks
+
+
+def ingest_video(local_path: str, display_name: str) -> str:
+    video_id_local = str(uuid.uuid4())  # our own tracking id for the blob path
+    blob_name = f"{video_id_local}.mp4"
+
+    print(f"[1/6] Uploading raw video to Blob Storage...")
+    blob_storage.upload_raw_video(local_path, blob_name)
+
+    print(f"[2/6] Uploading to Video Indexer and starting indexing...")
+    vi = VideoIndexerClient()
+    vi_video_id = vi.upload_video(local_path, display_name)
+
+    print(f"[3/6] Waiting for Video Indexer to finish processing (this can take a few minutes)...")
+    insights = vi.wait_for_processing(vi_video_id)
+
+    print(f"[4/6] Building overlapping chunks from transcript + OCR...")
+    chunks = build_chunks(vi_video_id, insights)
+    print(f"      -> {len(chunks)} chunks built")
+
+    print(f"[5/6] Resolving keyframe thumbnails and uploading images to Blob Storage...")
+    for chunk in chunks:
+        for kf in chunk.keyframes:
+            image_bytes = vi.get_thumbnail_bytes(vi_video_id, kf.thumbnail_id)
+            blob_storage.upload_keyframe_image(vi_video_id, kf.thumbnail_id, image_bytes)
+
+    print(f"[6/6] Embedding chunks and pushing to Azure AI Search...")
+    search_index.upload_chunks(chunks)
+
+    print(f"Done. Video Indexer video_id={vi_video_id}, blob raw video name={blob_name}")
+    return vi_video_id
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Usage: python ingest.py <local_video_path> <display_name>")
+        sys.exit(1)
+    ingest_video(sys.argv[1], sys.argv[2])
+\n```\n\n\n============================================================\nFILE: query.py\n============================================================\n\n```python\n# query.py
+"""
+Handles a user question against an already-ingested video.
+
+    question -> top-3 chunk retrieval -> exact-timestamp frame grab
+              -> vision-model answer -> (text, image_path, timestamp)
+
+The vision-model call and text-to-speech step are left as clearly marked
+plug-in points -- wire in whichever provider you choose there.
+"""
+
+import subprocess
+import tempfile
+import os
+
+import blob_storage
+import search_index
+
+
+def _grab_exact_frame(video_blob_name: str, timestamp_seconds: float) -> str:
+    """
+    Downloads the source video (or uses a cached local copy) and pulls the
+    exact frame at `timestamp_seconds` via ffmpeg. Returns a local file path.
+    This is the pixel-accurate fallback -- it does NOT rely on Video
+    Indexer's pre-picked keyframes.
+    """
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        local_video_path = os.path.join(tmp_dir, "source.mp4")
+        blob_storage.download_video_to_temp(video_blob_name, local_video_path)
+
+        out_path = os.path.join(tempfile.gettempdir(), f"frame_{timestamp_seconds:.2f}.jpg")
+        subprocess.run(
+            [
+                "ffmpeg", "-y",
+                "-ss", str(timestamp_seconds),
+                "-i", local_video_path,
+                "-frames:v", "1",
+                "-q:v", "2",
+                out_path,
+            ],
+            check=True,
+            capture_output=True,
+        )
+        return out_path
+
+
+def answer_question(question: str, video_blob_name: str) -> dict:
+    top_chunks = search_index.search_top_chunks(question, top_k=3)
+    if not top_chunks:
+        return {"text": "I couldn't find anything relevant in this video.", "image_path": None, "timestamp": None}
+
+    best = top_chunks[0]
+    context_text = "\n\n".join(c["text"] for c in top_chunks)
+
+    # Exact-timestamp frame grab at the best chunk's start time -- the
+    # precision fallback rather than trusting a pre-saved keyframe.
+    frame_path = _grab_exact_frame(video_blob_name, best["start_time"])
+
+    # --- Plug in your vision-capable model call here ---
+    # answer_text = call_vision_model(context_text, frame_path, question)
+    answer_text = (
+        "[PLACEHOLDER] Wire up a vision-capable model call here, passing "
+        f"context_text and the image at {frame_path} plus the user's question."
+    )
+
+    # --- Plug in text-to-speech here ---
+    # audio_path = call_tts(answer_text)
+
+    return {
+        "text": answer_text,
+        "image_path": frame_path,
+        "timestamp": best["start_time"],
+        "context_used": context_text,
+    }\n```\n\n\n============================================================\nFILE: test_query.py\n============================================================\n\n```python\nfrom dotenv import load_dotenv
+load_dotenv()
+
+from query import answer_question
+
+result = answer_question(
+    "What do I get with a free Azure account?",
+    video_blob_name="c89a56bb-c26e-446d-9a64-e00ef9ecd526.mp4",
+)
+
+print("ANSWER:", result["text"])
+print("TIMESTAMP:", result["timestamp"])
+print("IMAGE PATH:", result["image_path"])
+\n```\n

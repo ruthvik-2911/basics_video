@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Insight Chatbot</title>
+    <!-- Use Inter font for a premium look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --panel-bg: rgba(255, 255, 255, 0.95);
+            --border-color: rgba(226, 232, 240, 0.9);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --shell-red: #DD1D21;
+            --shell-red-hover: #c4181c;
+            --shell-yellow: #FFD500;
+            --accent-primary: #DD1D21;
+            --accent-hover: #c4181c;
+            --glass-blur: 16px;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 213, 0, 0.08), transparent 35%),
+                radial-gradient(circle at 90% 80%, rgba(221, 29, 33, 0.05), transparent 35%);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 100%;
+            padding: 0.75rem 1.25rem;
+            gap: 1.25rem;
+            box-sizing: border-box;
+            height: calc(100vh - 56px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Glassmorphism / Light Panel Base */
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s ease;
+        }
+
+        /* Left Side: Upload & Status */
+        .sidebar {
+            flex: 0 0 340px;
+            width: 340px;
+            gap: 1rem;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-right: 0.25rem;
+        }
+
+        .sidebar.collapsed {
+            flex: 0 0 0px;
+            width: 0px;
+            min-width: 0px;
+            padding: 0;
+            margin: 0;
+            opacity: 0;
+            pointer-events: none;
+            gap: 0;
+        }
+
+        /* Floating Edge Toggle Handle */
+        .sidebar-toggle-handle {
+            position: absolute;
+            top: 50%;
+            left: 338px;
+            transform: translateY(-50%);
+            z-index: 100;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            width: 24px;
+            height: 52px;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-toggle-handle:hover {
+            background: #f8fafc;
+            color: var(--shell-red);
+        }
+
+        .container.sidebar-collapsed .sidebar-toggle-handle {
+            left: 0px;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        input[type="text"], input[type="file"], select {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--shell-red);
+            box-shadow: 0 0 0 3px rgba(221, 29, 33, 0.12);
+        }
+
+        input[type="file"] {
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            background: #f8fafc;
+        }
+
+        button {
+            background: var(--shell-red);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(221, 29, 33, 0.25);
+        }
+
+        button:hover {
+            background: var(--shell-red-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(221, 29, 33, 0.35);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button:disabled {
+            background: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Status Card */
+        #status-card {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--shell-yellow);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-idle { background: #e2e8f0; color: #475569; }
+        .status-queued { background: #fef3c7; color: #92400e; }
+        .status-running { background: #fee2e2; color: #b91c1c; animation: pulse 2s infinite; }
+        .status-done { background: #dcfce7; color: #15803d; }
+        .status-error { background: #fee2e2; color: #b91c1c; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        #status-step {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Right Side: Chat */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            height: 100%;
+            max-height: 100%;
+            width: 100%;
+            overflow: hidden;
+            box-sizing: border-box;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .chat-history {
+            flex: 1 1 0%;
+            min-height: 0;
+            height: 0;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            scroll-behavior: smooth;
+        }
+
+        /* Scrollbar styling */
+        .chat-history::-webkit-scrollbar { width: 6px; }
+        .chat-history::-webkit-scrollbar-track { background: transparent; }
+        .chat-history::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+            animation: slideUp 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .bubble {
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .message.user .bubble {
+            background: linear-gradient(135deg, var(--shell-red) 0%, #c4181c 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot .bubble {
+            background: #ffffff;
+            color: #1e293b;
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 4px;
+        }
+
+        .snapshot-container {
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .snapshot-container img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .timestamp-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: monospace;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+            box-shadow: none;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            transform: none;
+            box-shadow: none;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 1rem;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: var(--text-primary);
+            border-radius: 12px;
+            font-size: 1rem;
+        }
+
+        .chat-input-area input:focus {
+            border-color: var(--shell-red);
+            box-shadow: 0 0 0 3px rgba(221, 29, 33, 0.12);
+        }
+
+        .chat-input-area input:disabled {
+            background: #f1f5f9;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Loading Dots */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 1rem;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+            width: fit-content;
+            display: none;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 100%; height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
+        <!-- Professional Clean Header Bar -->
+        <header style="width: 100%; height: 56px; background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 0 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: center; position: relative; box-sizing: border-box; flex-shrink: 0;">
+            <h1 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #0f172a; letter-spacing: -0.2px; text-align: center;">Video Intelligence Assistant</h1>
+        </header>
+
+        <div class="container">
+        <!-- Floating Edge Toggle Handle -->
+        <button id="sidebar-toggle-handle" title="Toggle Sidebar" class="sidebar-toggle-handle">
+            <span id="handle-arrow">◀</span>
+        </button>
+
+        <!-- LEFT SIDEBAR -->
+        <div class="sidebar">
+            <div class="glass-panel">
+                <h2 style="margin-top: 0; margin-bottom: 0.75rem;">Select Existing Video</h2>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="video-select">Previously Ingested Videos</label>
+                    <select id="video-select" style="background: #ffffff; border: 1px solid #cbd5e1; color: var(--text-primary); padding: 0.75rem; border-radius: 8px; font-family: inherit; outline: none; width: 100%;">
+                        <option value="">-- Choose a Video --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <h2>Ingest New Video</h2>
+                <form id="upload-form">
+                    <div class="form-group">
+                        <label for="display-name">Video Name</label>
+                        <input type="text" id="display-name" required placeholder="e.g. Tutorial V1">
+                    </div>
+                    <div class="form-group">
+                        <label for="video-file">Media File (.mp4, .mp3, .wav, .m4a)</label>
+                        <input type="file" id="video-file" accept="video/*,audio/*,.mp4,.mp3,.wav,.m4a,.mov,.mkv" required>
+                    </div>
+                    <button type="submit" id="upload-btn">Upload & Ingest</button>
+                </form>
+            </div>
+
+            <div class="glass-panel" style="flex: 1;">
+                <h2>Status</h2>
+                <div id="status-card">
+                    <div class="status-badge status-idle" id="status-badge">Waiting</div>
+                    <div id="status-step">Upload a video to begin the pipeline.</div>
+                </div>
+                
+                <div style="margin-top: auto; display: flex; align-items: center; gap: 0.5rem; padding-top: 1rem;">
+                    <input type="checkbox" id="tts-toggle" checked>
+                    <label for="tts-toggle">Speak answers aloud</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT CHAT AREA -->
+        <div class="glass-panel chat-container">
+            <h2>Insight Chat</h2>
+            
+            <div class="chat-history" id="chat-history">
+                <!-- Welcome message -->
+                <div class="message bot">
+                    <div class="bubble">
+                        Hello! Once your video finishes processing and the status reads "READY", you can ask me anything about what happens in the video.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="typing-indicator" id="typing-indicator">
+                <span></span><span></span><span></span>
+            </div>
+
+            <form id="chat-form" class="chat-input-area">
+                <input type="text" id="question-input" placeholder="Ask a question about the video..." disabled required autocomplete="off">
+                <button type="submit" id="send-btn" disabled>Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Floating Edge Toggle Handle Script
+        const container = document.querySelector('.container');
+        const sidebar = document.querySelector('.sidebar');
+        const toggleHandle = document.getElementById('sidebar-toggle-handle');
+        const handleArrow = document.getElementById('handle-arrow');
+
+        if (toggleHandle) {
+            toggleHandle.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+                container.classList.toggle('sidebar-collapsed');
+                if (sidebar.classList.contains('collapsed')) {
+                    handleArrow.innerText = '▶';
+                } else {
+                    handleArrow.innerText = '◀';
+                }
+            });
+        }
+
+        let currentJobId = 'all';
+        let pollInterval = null;
+
+        const uploadForm = document.getElementById('upload-form');
+        const uploadBtn = document.getElementById('upload-btn');
+        const statusBadge = document.getElementById('status-badge');
+        const statusStep = document.getElementById('status-step');
+        
+        const chatForm = document.getElementById('chat-form');
+        const questionInput = document.getElementById('question-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatHistory = document.getElementById('chat-history');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const ttsToggle = document.getElementById('tts-toggle');
+
+        const videoSelect = document.getElementById('video-select');
+
+        // Fetch existing videos on load
+        async function loadExistingVideos() {
+            try {
+                const res = await fetch('/api/videos');
+                if (!res.ok) return;
+                const videos = await res.json();
+                
+                videoSelect.innerHTML = '<option value="all">🌐 All Videos (Search Entire Library)</option>';
+                videos.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.job_id;
+                    opt.textContent = v.display_name;
+                    videoSelect.appendChild(opt);
+                });
+
+                // Enable chat by default for All Videos
+                questionInput.disabled = false;
+                sendBtn.disabled = false;
+                statusBadge.className = 'status-badge status-done';
+                statusBadge.innerText = 'READY';
+                statusStep.innerText = 'Searching across all videos in your library!';
+            } catch (err) {
+                console.error("Failed to load existing videos", err);
+            }
+        }
+        loadExistingVideos();
+
+        videoSelect.addEventListener('change', () => {
+            const selectedJobId = videoSelect.value || 'all';
+            currentJobId = selectedJobId;
+            statusBadge.className = 'status-badge status-done';
+            statusBadge.innerText = 'READY';
+            if (selectedJobId === 'all') {
+                statusStep.innerText = 'Searching across all videos in your library!';
+            } else {
+                statusStep.innerText = 'Ready to chat with selected video!';
+            }
+            questionInput.disabled = false;
+            sendBtn.disabled = false;
+            questionInput.focus();
+        });
+
+        let currentlySpeakingBtn = null;
+        let currentAudio = null;
+
+        // Text-to-Speech Helper using Azure Neural Voice
+        async function speak(text, button = null, isAuto = false) {
+            if (isAuto && !ttsToggle.checked) return;
+            
+            // If already playing audio for this button, stop it
+            if (currentAudio && currentlySpeakingBtn === button && button !== null) {
+                currentAudio.pause();
+                currentAudio = null;
+                button.innerText = '🔊';
+                button.title = 'Replay answer';
+                currentlySpeakingBtn = null;
+                return;
+            }
+
+            // Stop whatever is currently playing
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+
+            if (currentlySpeakingBtn) {
+                currentlySpeakingBtn.innerText = '🔊';
+                currentlySpeakingBtn.title = 'Replay answer';
+            }
+
+            if (button) {
+                currentlySpeakingBtn = button;
+                button.innerText = '⏹️'; // Stop icon
+                button.title = 'Stop reading';
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('text', text);
+                formData.append('voice', 'en-US-JennyNeural'); // Natural Azure Neural Voice
+
+                const res = await fetch('/api/tts', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!res.ok) throw new Error("Azure TTS failed");
+
+                const blob = await res.blob();
+                const audioUrl = URL.createObjectURL(blob);
+                currentAudio = new Audio(audioUrl);
+
+                currentAudio.onended = () => {
+                    if (currentlySpeakingBtn === button) {
+                        button.innerText = '🔊';
+                        button.title = 'Replay answer';
+                        currentlySpeakingBtn = null;
+                    }
+                };
+
+                currentAudio.onerror = () => {
+                    if (currentlySpeakingBtn === button) {
+                        button.innerText = '🔊';
+                        button.title = 'Replay answer';
+                        currentlySpeakingBtn = null;
+                    }
+                };
+
+                await currentAudio.play();
+            } catch (err) {
+                console.warn("Azure TTS fallback to Web Speech API", err);
+                const utterance = new SpeechSynthesisUtterance(text);
+                if (button) {
+                    utterance.onend = () => {
+                        if (currentlySpeakingBtn === button) {
+                            button.innerText = '🔊';
+                            currentlySpeakingBtn = null;
+                        }
+                    };
+                }
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Format seconds to MM:SS
+        function formatTime(seconds) {
+            if (!seconds) return "00:00";
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function appendMessage(role, text, imageB64 = null, timestamp = null, snapshots = null, structuredSteps = null) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${role}`;
+            
+            const parsedText = window.marked ? marked.parse(text) : text;
+            let innerHTML = `<div class="bubble">${parsedText}</div>`;
+            
+            if (structuredSteps && structuredSteps.length > 0) {
+                innerHTML += `<div class="structured-steps-container" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; width: 100%;">`;
+                structuredSteps.forEach(step => {
+                    const stepDesc = window.marked ? marked.parse(step.description || '') : (step.description || '');
+                    innerHTML += `
+                        <div class="step-card" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid var(--shell-yellow); border-radius: 12px; padding: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                            <h4 style="margin: 0 0 0.5rem 0; color: var(--shell-red); font-size: 0.95rem; font-weight: 700;">Step ${step.step_number}: ${step.title}</h4>
+                            <div class="step-description" style="font-size: 0.9rem; color: #334155; line-height: 1.5; margin-bottom: 0.75rem;">${stepDesc}</div>
+                            ${step.image_base64 ? `
+                                <div class="snapshot-container" style="position: relative; margin-top: 0.5rem;">
+                                    <img src="data:image/jpeg;base64,${step.image_base64}" alt="Step Frame" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color);">
+                                    <div class="timestamp-badge" style="position: absolute; bottom: 8px; right: 8px; background: rgba(15,23,42,0.85); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-family: monospace;">${formatTime(step.timestamp)}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                innerHTML += `</div>`;
+            } else if (snapshots && snapshots.length > 0) {
+                innerHTML += `<div class="snapshots-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 0.75rem; margin-top: 1rem; width: 100%;">`;
+                snapshots.forEach(snap => {
+                    innerHTML += `
+                        <div class="snapshot-container" style="margin-top: 0; position: relative;">
+                            <img src="data:image/jpeg;base64,${snap.image_base64}" alt="Video Frame" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <div class="timestamp-badge" style="position: absolute; bottom: 8px; right: 8px; background: rgba(15,23,42,0.85); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-family: monospace;">${formatTime(snap.timestamp)}</div>
+                        </div>
+                    `;
+                });
+                innerHTML += `</div>`;
+            } else if (imageB64) {
+                innerHTML += `
+                    <div class="snapshot-container">
+                        <img src="data:image/jpeg;base64,${imageB64}" alt="Video Frame">
+                        <div class="timestamp-badge">${formatTime(timestamp)}</div>
+                    </div>
+                `;
+            }
+
+            // Add play audio button for bot responses
+            if (role === 'bot') {
+                innerHTML += `
+                    <div class="message-actions">
+                        <button type="button" class="icon-btn play-audio-btn" title="Replay answer" data-text="${text.replace(/"/g, '&quot;')}">
+                            🔊
+                        </button>
+                    </div>
+                `;
+            }
+            
+            msgDiv.innerHTML = innerHTML;
+            chatHistory.appendChild(msgDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            // Attach listener to new play button
+            if (role === 'bot') {
+                const playBtn = msgDiv.querySelector('.play-audio-btn');
+                playBtn.addEventListener('click', () => {
+                    speak(playBtn.dataset.text, playBtn, false);
+                });
+            }
+        }
+
+        // Upload Video
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('video-file');
+            const nameInput = document.getElementById('display-name');
+            
+            if (!fileInput.files.length) return;
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('display_name', nameInput.value);
+
+            uploadBtn.disabled = true;
+            uploadBtn.innerText = "Uploading...";
+            
+            try {
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await res.json();
+                currentJobId = data.job_id;
+                
+                uploadBtn.innerText = "Ingesting";
+                
+                // Start polling status
+                if (pollInterval) clearInterval(pollInterval);
+                pollInterval = setInterval(checkStatus, 3000);
+                checkStatus();
+
+            } catch (err) {
+                console.error(err);
+                alert("Upload failed.");
+                uploadBtn.disabled = false;
+                uploadBtn.innerText = "Upload & Ingest";
+            }
+        });
+
+        async function checkStatus() {
+            if (!currentJobId) return;
+            
+            try {
+                const res = await fetch(`/api/status/${currentJobId}`);
+                if (!res.ok) return;
+                
+                const data = await res.json();
+                
+                statusStep.innerText = data.step || "Processing...";
+                
+                // Update badge colors
+                statusBadge.className = `status-badge status-${data.status}`;
+                statusBadge.innerText = data.status.toUpperCase();
+
+                if (data.status === 'done') {
+                    clearInterval(pollInterval);
+                    statusBadge.innerText = "READY";
+                    uploadBtn.innerText = "Done";
+                    questionInput.disabled = false;
+                    sendBtn.disabled = false;
+                    questionInput.focus();
+                    loadExistingVideos(); // Automatically refresh dropdown with the new video
+                } else if (data.status === 'error') {
+                    clearInterval(pollInterval);
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerText = "Retry Upload";
+                }
+            } catch (err) {
+                console.error("Status check failed", err);
+            }
+        }
+
+        // Ask Question
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentJobId) return;
+            
+            const q = questionInput.value.trim();
+            if (!q) return;
+
+            appendMessage('user', q);
+            questionInput.value = '';
+            questionInput.disabled = true;
+            sendBtn.disabled = true;
+            typingIndicator.style.display = 'flex';
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            const formData = new FormData();
+            formData.append('question', q);
+            formData.append('job_id', currentJobId);
+
+            try {
+                const res = await fetch('/api/ask', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await res.json();
+                typingIndicator.style.display = 'none';
+                
+                if (res.ok) {
+                    appendMessage('bot', data.text, data.image_base64, data.timestamp, data.snapshots, data.structured_steps);
+                    const lastBotMsg = chatHistory.querySelector('.message.bot:last-child');
+                    const playBtn = lastBotMsg ? lastBotMsg.querySelector('.play-audio-btn') : null;
+                    speak(data.text, playBtn, true);
+                } else {
+                    appendMessage('bot', "Sorry, I encountered an error answering that.");
+                }
+            } catch (err) {
+                typingIndicator.style.display = 'none';
+                appendMessage('bot', "Network error connecting to the backend.");
+            } finally {
+                questionInput.disabled = false;
+                sendBtn.disabled = false;
+                questionInput.focus();
+            }
+        });
+    </script>
+    </div>
+</body>
+</html>

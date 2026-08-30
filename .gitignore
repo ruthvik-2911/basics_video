@@ -1,0 +1,25 @@
+# Environment variables & secrets (CRITICAL: Do NOT commit secrets)
+.env
+
+# Python cache & virtualenv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+.venv/
+
+# Temporary media & frame downloads
+*.mp4
+*.jpg
+*.png
+*.jpeg
+cache_*
+frame_*
+
+# IDE / System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

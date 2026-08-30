@@ -1,0 +1,7 @@
+requests
+azure-identity
+azure-storage-blob
+azure-search-documents
+sentence-transformers
+python-dotenv
+openai

@@ -30,6 +30,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response
 
 from ingest import ingest_video
+import config
 import knowledge_graph
 from query import answer_question
 

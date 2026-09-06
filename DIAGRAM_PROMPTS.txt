@@ -1,0 +1,49 @@
+============================================================================================
+ULTRA-PREMIUM SLIDE 1 HERO INFOGRAPHIC PROMPT — UNIVERSAL MULTI-FORMAT PLATFORM
+============================================================================================
+
+PASTE THIS PROMPT INTO: ChatGPT (DALL-E) / Gemini / Midjourney / Canva AI / Napkin.ai
+============================================================================================
+
+============================================================================================
+PROMPT FOR SLIDE 1 COVER GRAPHIC (Hero Visual Infographic)
+============================================================================================
+
+Paste the exact text below into your AI Image Generator:
+--------------------------------------------------------------------------------------------
+"Create a stunning, high-resolution 2D presentation hero infographic slide for a product named 'Universal AI Knowledge Assistant'.
+
+Style: Sleek corporate light or dark theme with white background, subtle drop shadows, navy blue headers (#0D1B2A), and electric teal accents (#00D4AA). Ultra-clean layout, vector iconography, publication-quality presentation graphic. No code, no ugly artifacts.
+
+TITLE AT TOP: 'Universal AI Knowledge Assistant'
+SUBTITLE AT TOP: 'Transforming Videos, Audios, Documents & Spreadsheets into an Interactive Knowledge Base'
+
+LAYOUT — 3 MAIN COLUMNS (Left-to-Right Flow):
+
+--- LEFT COLUMN (HEADER: 'MULTI-FORMAT ENTERPRISE INPUTS'):
+Stack of 4 rounded card blocks showing supported media & document formats:
+  Card 1 (Blue icon): [ Video Files (.mp4, .mov) ] — Tutorials, Courses, Recordings
+  Card 2 (Green icon): [ Audio Files (.mp3, .wav) ] — Lectures, Meetings, Podcasts
+  Card 3 (Purple icon): [ Documents & Spreadsheets (.pdf, .docx, .xlsx) ] — Reports, SOPs, Financials
+  Card 4 (Orange icon): [ Images & Slides (.png, .jpg) ] — Screenshots, Diagrams, Resources
+
+--- CENTER COLUMN (HEADER: 'AI INTELLIGENCE BRAIN'):
+A prominent glowing 3D/2D digital AI Brain & Lens graphic in electric teal and cyan. Glowing connecting lines flow into the brain from the left inputs, and output arrows flow out to the right.
+Sub-caption underneath the brain: 'Understands  •  Analyzes  •  Connects  •  Answers'
+
+--- RIGHT COLUMN (HEADER: 'INTELLIGENT MULTIMODAL OUTPUTS'):
+3 stacked feature cards showing the generated outputs:
+  Output Card 1 (Numbered '1'): [ Step-by-Step Answers & Citations ] — Visual card showing text explanation paired with a video frame screenshot [02:30] AND document page citation (Page 4 / Sheet: Budget, Row 15).
+  Output Card 2 (Numbered '2'): [ Interactive Knowledge Graph ] — Showing a colorful connected node mind-map of topics, tools, and actions.
+  Output Card 3 (Numbered '3'): [ Neural Voice Playback Engine ] — Showing a glowing sound wave and microphone icon for natural voice narration.
+
+--- BOTTOM FEATURE BAR (Horizontal pill cards at the bottom):
+4 pill icons side-by-side:
+  - 🎯 Accurate (Context-aware answers with exact citations)
+  - ⚡ Fast (End-to-end processing & sub-second search)
+  - 🛡️ Secure (Enterprise-grade security & privacy)
+  - ☁️ Scalable (Built on Microsoft Azure AI architecture)
+
+Overall Feel: Extremely crisp, modern, executive-level presentation cover graphic."
+--------------------------------------------------------------------------------------------
+============================================================================================

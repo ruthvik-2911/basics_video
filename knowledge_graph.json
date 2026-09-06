@@ -1,0 +1,1878 @@
+{
+  "nodes": [
+    {
+      "id": "video_nh1et02pzn",
+      "label": "Azure Free Account Walkthrough",
+      "group": "video",
+      "shape": "hexagon",
+      "color": {
+        "background": "#DD1D21",
+        "border": "#b91c1c",
+        "highlight": {
+          "background": "#FFD500",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#ffffff",
+        "face": "Inter",
+        "size": 14
+      },
+      "title": "Video: Azure Free Account Walkthrough"
+    },
+    {
+      "id": "ent_azure_free_account",
+      "label": "Azure Free Account",
+      "group": "topic",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#eff6ff",
+        "border": "#3b82f6",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#1d4ed8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Topic"
+    },
+    {
+      "id": "ent_microsoft_azure",
+      "label": "Microsoft Azure",
+      "group": "tool",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f0fdf4",
+        "border": "#22c55e",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#15803d",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Tool"
+    },
+    {
+      "id": "ent_inprivate_browsing",
+      "label": "InPrivate Browsing",
+      "group": "setting",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f3e8ff",
+        "border": "#a855f7",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#6b21a8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Setting"
+    },
+    {
+      "id": "ent_azure_com",
+      "label": "Azure.com",
+      "group": "tool",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f0fdf4",
+        "border": "#22c55e",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#15803d",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Tool"
+    },
+    {
+      "id": "ent_azure_ai_studio",
+      "label": "Azure AI Studio",
+      "group": "tool",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f0fdf4",
+        "border": "#22c55e",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#15803d",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Tool"
+    },
+    {
+      "id": "ent_cloud_computing_services",
+      "label": "Cloud Computing Services",
+      "group": "topic",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#eff6ff",
+        "border": "#3b82f6",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#1d4ed8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Topic"
+    },
+    {
+      "id": "ent_azure_hybrid_benefit",
+      "label": "Azure Hybrid Benefit",
+      "group": "tool",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f0fdf4",
+        "border": "#22c55e",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#15803d",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Tool"
+    },
+    {
+      "id": "ent_azure_migration_and_security",
+      "label": "Azure Migration and Security",
+      "group": "topic",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#eff6ff",
+        "border": "#3b82f6",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#1d4ed8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Topic"
+    },
+    {
+      "id": "video_chjsykknjl",
+      "label": "Azure Tutorial",
+      "group": "video",
+      "shape": "hexagon",
+      "color": {
+        "background": "#DD1D21",
+        "border": "#b91c1c",
+        "highlight": {
+          "background": "#FFD500",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#ffffff",
+        "face": "Inter",
+        "size": 14
+      },
+      "title": "Video: Azure Tutorial"
+    },
+    {
+      "id": "ent_microsoft_bing_search",
+      "label": "Microsoft Bing Search",
+      "group": "tool",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f0fdf4",
+        "border": "#22c55e",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#15803d",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Tool"
+    },
+    {
+      "id": "ent_azure_security__productivity__and_ai_capability",
+      "label": "Azure Security, Productivity, and AI Capability",
+      "group": "topic",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#eff6ff",
+        "border": "#3b82f6",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#1d4ed8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Topic"
+    },
+    {
+      "id": "video_90rmos1tm1",
+      "label": "Azure Guide",
+      "group": "video",
+      "shape": "hexagon",
+      "color": {
+        "background": "#DD1D21",
+        "border": "#b91c1c",
+        "highlight": {
+          "background": "#FFD500",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#ffffff",
+        "face": "Inter",
+        "size": 14
+      },
+      "title": "Video: Azure Guide"
+    },
+    {
+      "id": "ent_azure_portal",
+      "label": "Azure portal",
+      "group": "tool",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f0fdf4",
+        "border": "#22c55e",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#15803d",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Tool"
+    },
+    {
+      "id": "ent_all_services",
+      "label": "All services",
+      "group": "tool",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f0fdf4",
+        "border": "#22c55e",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#15803d",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Tool"
+    },
+    {
+      "id": "ent_subscriptions",
+      "label": "Subscriptions",
+      "group": "tool",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f0fdf4",
+        "border": "#22c55e",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#15803d",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Tool"
+    },
+    {
+      "id": "ent_azure_subscription",
+      "label": "Azure subscription",
+      "group": "setting",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f3e8ff",
+        "border": "#a855f7",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#6b21a8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Setting"
+    },
+    {
+      "id": "ent_subscription_cost_by_resource",
+      "label": "Subscription cost by resource",
+      "group": "setting",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f3e8ff",
+        "border": "#a855f7",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#6b21a8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Setting"
+    },
+    {
+      "id": "ent_cancel_subscription",
+      "label": "Cancel subscription",
+      "group": "action",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#fef3c7",
+        "border": "#f59e0b",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#b45309",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Action"
+    },
+    {
+      "id": "video_raftu7ydaf",
+      "label": "flight ticket booking",
+      "group": "video",
+      "shape": "hexagon",
+      "color": {
+        "background": "#DD1D21",
+        "border": "#b91c1c",
+        "highlight": {
+          "background": "#FFD500",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#ffffff",
+        "face": "Inter",
+        "size": 14
+      },
+      "title": "Video: flight ticket booking"
+    },
+    {
+      "id": "ent_flight_ticket_booking",
+      "label": "Flight Ticket Booking",
+      "group": "topic",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#eff6ff",
+        "border": "#3b82f6",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#1d4ed8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Topic"
+    },
+    {
+      "id": "ent_google_flights",
+      "label": "Google Flights",
+      "group": "tool",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f0fdf4",
+        "border": "#22c55e",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#15803d",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Tool"
+    },
+    {
+      "id": "ent_round_trip_flight",
+      "label": "Round Trip Flight",
+      "group": "topic",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#eff6ff",
+        "border": "#3b82f6",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#1d4ed8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Topic"
+    },
+    {
+      "id": "ent_searching_flights",
+      "label": "Searching Flights",
+      "group": "action",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#fef3c7",
+        "border": "#f59e0b",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#b45309",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Action"
+    },
+    {
+      "id": "ent_booking_tickets",
+      "label": "Booking Tickets",
+      "group": "action",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#fef3c7",
+        "border": "#f59e0b",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#b45309",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Action"
+    },
+    {
+      "id": "ent_canceling_tickets",
+      "label": "Canceling Tickets",
+      "group": "action",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#fef3c7",
+        "border": "#f59e0b",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#b45309",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Action"
+    },
+    {
+      "id": "ent_full_refund_for_non_refundable_tickets",
+      "label": "Full Refund for Non-Refundable Tickets",
+      "group": "topic",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#eff6ff",
+        "border": "#3b82f6",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#1d4ed8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Topic"
+    },
+    {
+      "id": "ent_popular_destinations",
+      "label": "Popular Destinations",
+      "group": "setting",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f3e8ff",
+        "border": "#a855f7",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#6b21a8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Setting"
+    },
+    {
+      "id": "video_7xk7ezwvsn",
+      "label": "audio of metro ticket booking",
+      "group": "video",
+      "shape": "hexagon",
+      "color": {
+        "background": "#DD1D21",
+        "border": "#b91c1c",
+        "highlight": {
+          "background": "#FFD500",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#ffffff",
+        "face": "Inter",
+        "size": 14
+      },
+      "title": "Video: audio of metro ticket booking"
+    },
+    {
+      "id": "ent_online_ticket_booking",
+      "label": "Online Ticket Booking",
+      "group": "topic",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#eff6ff",
+        "border": "#3b82f6",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#1d4ed8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Topic"
+    },
+    {
+      "id": "ent_namma_metro_app",
+      "label": "Namma Metro App",
+      "group": "tool",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f0fdf4",
+        "border": "#22c55e",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#15803d",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Tool"
+    },
+    {
+      "id": "ent_language_options",
+      "label": "Language Options",
+      "group": "setting",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f3e8ff",
+        "border": "#a855f7",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#6b21a8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Setting"
+    },
+    {
+      "id": "ent_qr_ticket",
+      "label": "QR Ticket",
+      "group": "action",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#fef3c7",
+        "border": "#f59e0b",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#b45309",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Action"
+    },
+    {
+      "id": "ent_timetable",
+      "label": "Timetable",
+      "group": "topic",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#eff6ff",
+        "border": "#3b82f6",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#1d4ed8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Topic"
+    },
+    {
+      "id": "ent_fare_info",
+      "label": "Fare Info",
+      "group": "topic",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#eff6ff",
+        "border": "#3b82f6",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#1d4ed8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Topic"
+    },
+    {
+      "id": "ent_user_information__mobile__name__email_",
+      "label": "User Information (Mobile, Name, Email)",
+      "group": "setting",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#f3e8ff",
+        "border": "#a855f7",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#6b21a8",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Setting"
+    },
+    {
+      "id": "ent_ticket_purchase_process",
+      "label": "Ticket Purchase Process",
+      "group": "action",
+      "shape": "box",
+      "margin": 10,
+      "color": {
+        "background": "#fef3c7",
+        "border": "#f59e0b",
+        "highlight": {
+          "background": "#ffffff",
+          "border": "#DD1D21"
+        }
+      },
+      "font": {
+        "color": "#b45309",
+        "face": "Inter",
+        "size": 13
+      },
+      "title": "Category: Action"
+    }
+  ],
+  "edges": [
+    {
+      "id": "video_nh1et02pzn_to_ent_azure_free_account",
+      "from": "video_nh1et02pzn",
+      "to": "ent_azure_free_account",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_nh1et02pzn_to_ent_microsoft_azure",
+      "from": "video_nh1et02pzn",
+      "to": "ent_microsoft_azure",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_nh1et02pzn_to_ent_inprivate_browsing",
+      "from": "video_nh1et02pzn",
+      "to": "ent_inprivate_browsing",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_nh1et02pzn_to_ent_azure_com",
+      "from": "video_nh1et02pzn",
+      "to": "ent_azure_com",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_nh1et02pzn_to_ent_azure_ai_studio",
+      "from": "video_nh1et02pzn",
+      "to": "ent_azure_ai_studio",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_nh1et02pzn_to_ent_cloud_computing_services",
+      "from": "video_nh1et02pzn",
+      "to": "ent_cloud_computing_services",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_nh1et02pzn_to_ent_azure_hybrid_benefit",
+      "from": "video_nh1et02pzn",
+      "to": "ent_azure_hybrid_benefit",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_nh1et02pzn_to_ent_azure_migration_and_security",
+      "from": "video_nh1et02pzn",
+      "to": "ent_azure_migration_and_security",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "ent_azure_free_account_rel_ent_microsoft_azure",
+      "from": "ent_azure_free_account",
+      "to": "ent_microsoft_azure",
+      "label": "explains",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_inprivate_browsing_rel_ent_azure_com",
+      "from": "ent_inprivate_browsing",
+      "to": "ent_azure_com",
+      "label": "is used for",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_azure_com_rel_ent_azure_ai_studio",
+      "from": "ent_azure_com",
+      "to": "ent_azure_ai_studio",
+      "label": "provides details about",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_azure_com_rel_ent_cloud_computing_services",
+      "from": "ent_azure_com",
+      "to": "ent_cloud_computing_services",
+      "label": "explains",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_azure_hybrid_benefit_rel_ent_cloud_computing_services",
+      "from": "ent_azure_hybrid_benefit",
+      "to": "ent_cloud_computing_services",
+      "label": "is related to",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_azure_free_account_rel_ent_azure_migration_and_security",
+      "from": "ent_azure_free_account",
+      "to": "ent_azure_migration_and_security",
+      "label": "includes",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_microsoft_azure_rel_ent_azure_free_account",
+      "from": "ent_microsoft_azure",
+      "to": "ent_azure_free_account",
+      "label": "offers",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_azure_ai_studio_rel_ent_microsoft_azure",
+      "from": "ent_azure_ai_studio",
+      "to": "ent_microsoft_azure",
+      "label": "is a component of",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "video_chjsykknjl_to_ent_microsoft_azure",
+      "from": "video_chjsykknjl",
+      "to": "ent_microsoft_azure",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_chjsykknjl_to_ent_azure_free_account",
+      "from": "video_chjsykknjl",
+      "to": "ent_azure_free_account",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_chjsykknjl_to_ent_inprivate_browsing",
+      "from": "video_chjsykknjl",
+      "to": "ent_inprivate_browsing",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_chjsykknjl_to_ent_microsoft_bing_search",
+      "from": "video_chjsykknjl",
+      "to": "ent_microsoft_bing_search",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_chjsykknjl_to_ent_azure_ai_studio",
+      "from": "video_chjsykknjl",
+      "to": "ent_azure_ai_studio",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_chjsykknjl_to_ent_azure_hybrid_benefit",
+      "from": "video_chjsykknjl",
+      "to": "ent_azure_hybrid_benefit",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_chjsykknjl_to_ent_cloud_computing_services",
+      "from": "video_chjsykknjl",
+      "to": "ent_cloud_computing_services",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_chjsykknjl_to_ent_azure_security__productivity__and_ai_capability",
+      "from": "video_chjsykknjl",
+      "to": "ent_azure_security__productivity__and_ai_capability",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "ent_microsoft_azure_rel_ent_azure_ai_studio",
+      "from": "ent_microsoft_azure",
+      "to": "ent_azure_ai_studio",
+      "label": "includes",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_microsoft_azure_rel_ent_cloud_computing_services",
+      "from": "ent_microsoft_azure",
+      "to": "ent_cloud_computing_services",
+      "label": "provides",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_azure_free_account_rel_ent_microsoft_bing_search",
+      "from": "ent_azure_free_account",
+      "to": "ent_microsoft_bing_search",
+      "label": "requires setup via",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_inprivate_browsing_rel_ent_microsoft_bing_search",
+      "from": "ent_inprivate_browsing",
+      "to": "ent_microsoft_bing_search",
+      "label": "enhances privacy during",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_microsoft_azure_rel_ent_azure_hybrid_benefit",
+      "from": "ent_microsoft_azure",
+      "to": "ent_azure_hybrid_benefit",
+      "label": "supports",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_cloud_computing_services_rel_ent_azure_security__productivity__and_ai_capability",
+      "from": "ent_cloud_computing_services",
+      "to": "ent_azure_security__productivity__and_ai_capability",
+      "label": "enable",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "video_90rmos1tm1_to_ent_microsoft_azure",
+      "from": "video_90rmos1tm1",
+      "to": "ent_microsoft_azure",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_90rmos1tm1_to_ent_azure_free_account",
+      "from": "video_90rmos1tm1",
+      "to": "ent_azure_free_account",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_90rmos1tm1_to_ent_azure_portal",
+      "from": "video_90rmos1tm1",
+      "to": "ent_azure_portal",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_90rmos1tm1_to_ent_all_services",
+      "from": "video_90rmos1tm1",
+      "to": "ent_all_services",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_90rmos1tm1_to_ent_subscriptions",
+      "from": "video_90rmos1tm1",
+      "to": "ent_subscriptions",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_90rmos1tm1_to_ent_azure_subscription",
+      "from": "video_90rmos1tm1",
+      "to": "ent_azure_subscription",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_90rmos1tm1_to_ent_subscription_cost_by_resource",
+      "from": "video_90rmos1tm1",
+      "to": "ent_subscription_cost_by_resource",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_90rmos1tm1_to_ent_cancel_subscription",
+      "from": "video_90rmos1tm1",
+      "to": "ent_cancel_subscription",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "ent_microsoft_azure_rel_ent_azure_portal",
+      "from": "ent_microsoft_azure",
+      "to": "ent_azure_portal",
+      "label": "provides access to",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_azure_portal_rel_ent_all_services",
+      "from": "ent_azure_portal",
+      "to": "ent_all_services",
+      "label": "contains",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_all_services_rel_ent_subscriptions",
+      "from": "ent_all_services",
+      "to": "ent_subscriptions",
+      "label": "includes",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_subscriptions_rel_ent_azure_subscription",
+      "from": "ent_subscriptions",
+      "to": "ent_azure_subscription",
+      "label": "includes",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_azure_subscription_rel_ent_subscription_cost_by_resource",
+      "from": "ent_azure_subscription",
+      "to": "ent_subscription_cost_by_resource",
+      "label": "tracks",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_subscriptions_rel_ent_cancel_subscription",
+      "from": "ent_subscriptions",
+      "to": "ent_cancel_subscription",
+      "label": "allows action",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_cancel_subscription_rel_ent_azure_subscription",
+      "from": "ent_cancel_subscription",
+      "to": "ent_azure_subscription",
+      "label": "applies to",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "video_raftu7ydaf_to_ent_flight_ticket_booking",
+      "from": "video_raftu7ydaf",
+      "to": "ent_flight_ticket_booking",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_raftu7ydaf_to_ent_google_flights",
+      "from": "video_raftu7ydaf",
+      "to": "ent_google_flights",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_raftu7ydaf_to_ent_round_trip_flight",
+      "from": "video_raftu7ydaf",
+      "to": "ent_round_trip_flight",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_raftu7ydaf_to_ent_searching_flights",
+      "from": "video_raftu7ydaf",
+      "to": "ent_searching_flights",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_raftu7ydaf_to_ent_booking_tickets",
+      "from": "video_raftu7ydaf",
+      "to": "ent_booking_tickets",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_raftu7ydaf_to_ent_canceling_tickets",
+      "from": "video_raftu7ydaf",
+      "to": "ent_canceling_tickets",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_raftu7ydaf_to_ent_full_refund_for_non_refundable_tickets",
+      "from": "video_raftu7ydaf",
+      "to": "ent_full_refund_for_non_refundable_tickets",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_raftu7ydaf_to_ent_popular_destinations",
+      "from": "video_raftu7ydaf",
+      "to": "ent_popular_destinations",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "ent_flight_ticket_booking_rel_ent_google_flights",
+      "from": "ent_flight_ticket_booking",
+      "to": "ent_google_flights",
+      "label": "uses",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_searching_flights_rel_ent_round_trip_flight",
+      "from": "ent_searching_flights",
+      "to": "ent_round_trip_flight",
+      "label": "explains",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_google_flights_rel_ent_searching_flights",
+      "from": "ent_google_flights",
+      "to": "ent_searching_flights",
+      "label": "facilitates",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_google_flights_rel_ent_booking_tickets",
+      "from": "ent_google_flights",
+      "to": "ent_booking_tickets",
+      "label": "facilitates",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_booking_tickets_rel_ent_round_trip_flight",
+      "from": "ent_booking_tickets",
+      "to": "ent_round_trip_flight",
+      "label": "relates to",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_canceling_tickets_rel_ent_full_refund_for_non_refundable_tickets",
+      "from": "ent_canceling_tickets",
+      "to": "ent_full_refund_for_non_refundable_tickets",
+      "label": "results in",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_searching_flights_rel_ent_popular_destinations",
+      "from": "ent_searching_flights",
+      "to": "ent_popular_destinations",
+      "label": "includes",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_popular_destinations_rel_ent_flight_ticket_booking",
+      "from": "ent_popular_destinations",
+      "to": "ent_flight_ticket_booking",
+      "label": "configures",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "video_7xk7ezwvsn_to_ent_online_ticket_booking",
+      "from": "video_7xk7ezwvsn",
+      "to": "ent_online_ticket_booking",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_7xk7ezwvsn_to_ent_namma_metro_app",
+      "from": "video_7xk7ezwvsn",
+      "to": "ent_namma_metro_app",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_7xk7ezwvsn_to_ent_language_options",
+      "from": "video_7xk7ezwvsn",
+      "to": "ent_language_options",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_7xk7ezwvsn_to_ent_qr_ticket",
+      "from": "video_7xk7ezwvsn",
+      "to": "ent_qr_ticket",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_7xk7ezwvsn_to_ent_timetable",
+      "from": "video_7xk7ezwvsn",
+      "to": "ent_timetable",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_7xk7ezwvsn_to_ent_fare_info",
+      "from": "video_7xk7ezwvsn",
+      "to": "ent_fare_info",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_7xk7ezwvsn_to_ent_user_information__mobile__name__email_",
+      "from": "video_7xk7ezwvsn",
+      "to": "ent_user_information__mobile__name__email_",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "video_7xk7ezwvsn_to_ent_ticket_purchase_process",
+      "from": "video_7xk7ezwvsn",
+      "to": "ent_ticket_purchase_process",
+      "label": "covers",
+      "color": {
+        "color": "#cbd5e1",
+        "highlight": "#DD1D21"
+      },
+      "font": {
+        "size": 10,
+        "color": "#64748b"
+      }
+    },
+    {
+      "id": "ent_online_ticket_booking_rel_ent_namma_metro_app",
+      "from": "ent_online_ticket_booking",
+      "to": "ent_namma_metro_app",
+      "label": "facilitated by",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_namma_metro_app_rel_ent_language_options",
+      "from": "ent_namma_metro_app",
+      "to": "ent_language_options",
+      "label": "offers",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_namma_metro_app_rel_ent_qr_ticket",
+      "from": "ent_namma_metro_app",
+      "to": "ent_qr_ticket",
+      "label": "supports",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_namma_metro_app_rel_ent_timetable",
+      "from": "ent_namma_metro_app",
+      "to": "ent_timetable",
+      "label": "provides",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_namma_metro_app_rel_ent_fare_info",
+      "from": "ent_namma_metro_app",
+      "to": "ent_fare_info",
+      "label": "provides",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_ticket_purchase_process_rel_ent_user_information__mobile__name__email_",
+      "from": "ent_ticket_purchase_process",
+      "to": "ent_user_information__mobile__name__email_",
+      "label": "requires",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    },
+    {
+      "id": "ent_ticket_purchase_process_rel_ent_fare_info",
+      "from": "ent_ticket_purchase_process",
+      "to": "ent_fare_info",
+      "label": "confirms",
+      "arrows": "to",
+      "color": {
+        "color": "#94a3b8",
+        "highlight": "#3b82f6"
+      },
+      "font": {
+        "size": 10,
+        "color": "#475569"
+      }
+    }
+  ]
+}

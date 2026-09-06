@@ -1,0 +1,58 @@
+============================================================================================
+AI PPT MAKER PROMPT — SLIDE 1: PROJECT CONTEXT, PROBLEMS & SOLUTION
+============================================================================================
+
+PASTE THIS FULL PROMPT INTO: Gamma.app / Beautiful.ai / Tome / SlidesAI / Canva AI
+============================================================================================
+
+GLOBAL DESIGN RULES:
+- Theme: Ultra-premium dark mode. Background: Dark Navy / Charcoal (#0D1B2A).
+- Accent Color: Electric Teal (#00D4AA) or Steel Blue (#3B82F6) for highlights.
+- Typography: Clean modern sans-serif (Inter / Plus Jakarta Sans).
+- Layout: 2 Main Columns (Left: The Challenges We Solve | Right: How Our Project Overcomes Them).
+- Tone: Executive, strategic, non-technical, client-ready. ZERO code or technical jargon.
+
+============================================================================================
+SLIDE 1 — PROJECT CONTEXT: PROBLEMS & SOLUTION
+============================================================================================
+
+SLIDE TITLE: "Universal AI Knowledge Assistant"
+SLIDE SUBTITLE: "Transforming Fragmented Media Archives into an Intelligent, Actionable Knowledge Base"
+
+LAYOUT: 2 Main Columns (Left 50%: The Challenges | Right 50%: How We Overcome Them) + Bottom Impact Summary.
+
+--- LEFT COLUMN: THE PROBLEMS WE ARE SOLVING ⚠️ ---
+
+HEADER: "Why We Built This (The Enterprise Challenge)"
+
+CARD 1: ⏳ Manually Scrubbing Video Timelines
+- Problem: Finding a 30-second instruction inside a 45-minute training recording forces employees to manually watch and scrub through timelines, burning hours of productive time.
+
+CARD 2: 📚 Fragmented File Silos
+- Problem: Crucial knowledge is scattered across video tutorials, audio recordings, 50-page PDF reports, Word SOPs, and Excel spreadsheets with no single place to search across them all.
+
+CARD 3: ❓ Unverifiable AI Answers
+- Problem: Traditional search tools give generic text answers without proving where the information came from, leading to low trust and missed context.
+
+--- RIGHT COLUMN: HOW OUR PROJECT OVERCOMES THEM 💡 ---
+
+HEADER: "How Our Project Solves This (Our Solution)"
+
+CARD 1: 🎬 Step-by-Step Visual & Timestamped Answers
+- Solution: Answers video questions by displaying exact step-by-step text paired with the exact video frame screenshot and clickable timestamp (e.g. [02:30]).
+
+CARD 2: 📄 Universal Multi-Format Brain
+- Solution: Serves as a single unified search assistant for Videos (.mp4), Audios (.mp3), PDFs (.pdf), Word docs (.docx), Excel spreadsheets (.xlsx), and Images (.png, .jpg).
+
+CARD 3: 🎯 Exact Precision Citations & Neural Voice
+- Solution: Every answer is backed by verifiable citations (exact Video Title + Timestamp OR Document Page # / Excel Sheet & Row #) and can be listened to via human-like Neural Voice.
+
+--- BOTTOM ROW: KEY BUSINESS IMPACT 🚀 ---
+(3 horizontal highlight pills at the bottom)
+  - ⏱️ 80% Reduction in Search Time (Instant answers instead of scrubbing videos or skimming pages)
+  - 🎯 100% Verifiable Accuracy (Exact screenshot & page/row citations for every claim)
+  - 🕸️ Unified Knowledge Mind-Map (Visually connects topics across all organizational files)
+
+============================================================================================
+END OF SLIDE 1 PROMPT
+============================================================================================

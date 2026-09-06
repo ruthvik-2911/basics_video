@@ -78,13 +78,50 @@ def _get_dynamic_step_count(chunks: list) -> int:
         return 6
 
 
-def _resolve_blob_name(chunk: dict, fallback_blob_name: str, video_map: dict) -> tuple[str, str]:
-    """Returns (blob_name, display_name) for a chunk."""
-    chunk_vi_id = chunk.get("video_id")
-    if video_map and chunk_vi_id in video_map:
-        info = video_map[chunk_vi_id]
-        return info.get("blob_name", fallback_blob_name), info.get("display_name", "")
-    return fallback_blob_name, ""
+def _resolve_blob_info(chunk: dict, fallback_blob_name: str, video_map: dict) -> tuple[str, str, str, str]:
+    """Returns (blob_name, display_name, source_type, location) for a chunk."""
+    chunk_id = chunk.get("video_id")
+    s_type = chunk.get("source_type", "video")
+    
+    # Extract location from keyframe_thumbnail_ids if available (e.g. "loc:Page 2")
+    loc = ""
+    for thumb in chunk.get("keyframe_thumbnail_ids", []) or []:
+        if thumb and thumb.startswith("loc:"):
+            loc = thumb[4:]
+            break
+
+    if video_map and chunk_id in video_map:
+        info = video_map[chunk_id]
+        blob = info.get("blob_name", fallback_blob_name)
+        disp = info.get("display_name", "")
+        s_type = info.get("source_type", s_type)
+        return blob, disp, s_type, loc
+
+    return fallback_blob_name, "", s_type, loc
+
+
+def _get_image_for_chunk(blob_name: str, source_type: str, timestamp_or_page: float) -> str:
+    """Returns local image path for a video frame or standalone image, or None for documents."""
+    if not blob_name:
+        return None
+
+    temp_dir = tempfile.gettempdir()
+
+    # If it's a standalone image file
+    if source_type == "image":
+        local_img_path = os.path.join(temp_dir, f"cache_{blob_name}")
+        if not os.path.exists(local_img_path):
+            try:
+                blob_storage.download_video_to_temp(blob_name, local_img_path)
+            except Exception:
+                return None
+        return local_img_path
+
+    # If it's a video file, extract exact frame
+    if source_type == "video":
+        return _grab_exact_frame(blob_name, timestamp_or_page)
+
+    return None
 
 
 def answer_question(question: str, video_blob_name: str = None, video_id: str = None, video_map: dict = None) -> dict:
@@ -92,13 +129,13 @@ def answer_question(question: str, video_blob_name: str = None, video_id: str = 
 
     # Determine if it's a general summary query
     if _is_summary_query(question):
-        # Fetch candidate chunks across video(s)
+        # Fetch candidate chunks across library
         candidate_chunks = search_index.search_top_chunks(question, video_id=video_id, video_map=video_map, top_k=6)
         if not candidate_chunks:
-            return {"text": "I couldn't find anything relevant across the video library.", "snapshots": [], "structured_steps": None}
+            return {"text": "I couldn't find anything relevant across your knowledge library.", "snapshots": [], "citations": [], "structured_steps": None}
 
         target_count = _get_dynamic_step_count(candidate_chunks)
-        chronological = sorted(candidate_chunks, key=lambda c: c["start_time"])
+        chronological = sorted(candidate_chunks, key=lambda c: c.get("start_time", 0))
         
         # Select evenly spaced chunks
         if len(chronological) > target_count:
@@ -109,21 +146,35 @@ def answer_question(question: str, video_blob_name: str = None, video_id: str = 
 
         context_text = "\n\n".join(c["text"] for c in selected_chunks)
         snapshots = []
+        citations = []
         frame_paths = []
+
         for chunk in selected_chunks:
-            b_name, d_name = _resolve_blob_name(chunk, video_blob_name, video_map)
-            path = _grab_exact_frame(b_name, chunk["start_time"]) if b_name else None
-            frame_paths.append(path)
+            b_name, d_name, s_type, loc = _resolve_blob_info(chunk, video_blob_name, video_map)
+            path = _get_image_for_chunk(b_name, s_type, chunk.get("start_time", 0))
+            if path:
+                frame_paths.append(path)
+            
+            # Record citation
+            citation_item = {
+                "file_name": d_name or b_name or "Document",
+                "source_type": s_type,
+                "location": loc or (f"{chunk.get('start_time', 0):.2f}s" if s_type == "video" else f"Page {int(chunk.get('start_time', 1))}"),
+                "image_path": path,
+            }
+            citations.append(citation_item)
             snapshots.append({
                 "image_path": path,
-                "timestamp": chunk["start_time"],
-                "video_title": d_name
+                "timestamp": chunk.get("start_time", 0),
+                "video_title": d_name,
+                "location": loc or "",
+                "source_type": s_type
             })
         
         answer_raw = call_vision_model(context_text, frame_paths, question)
         try:
             parsed = json.loads(answer_raw)
-            answer_text = parsed.get("summary", "Here is the step-by-step breakdown of the video:")
+            answer_text = parsed.get("summary", "Here is the step-by-step breakdown:")
             raw_steps = parsed.get("steps", [])
             structured_steps = []
             for idx, step in enumerate(raw_steps):
@@ -133,35 +184,51 @@ def answer_question(question: str, video_blob_name: str = None, video_id: str = 
                     "title": step.get("title", f"Step {idx+1}"),
                     "description": step.get("description", ""),
                     "image_path": snap["image_path"],
-                    "timestamp": snap["timestamp"]
+                    "timestamp": snap["timestamp"],
+                    "source_type": snap.get("source_type", "video"),
+                    "location": snap.get("location", "")
                 })
         except Exception:
             answer_text = answer_raw
     else:
-        # Specific query: grab only the single best frame
+        # Specific query: grab top chunks
         top_chunks = search_index.search_top_chunks(question, video_id=video_id, video_map=video_map, top_k=3)
         if not top_chunks:
-            return {"text": "I couldn't find anything relevant across the video library.", "snapshots": [], "structured_steps": None}
+            return {"text": "I couldn't find anything relevant across your knowledge library.", "snapshots": [], "citations": [], "structured_steps": None}
 
         context_text = "\n\n".join(c["text"] for c in top_chunks)
         best = top_chunks[0]
-        b_name, d_name = _resolve_blob_name(best, video_blob_name, video_map)
-        path = _grab_exact_frame(b_name, best["start_time"]) if b_name else None
+        b_name, d_name, s_type, loc = _resolve_blob_info(best, video_blob_name, video_map)
+        path = _get_image_for_chunk(b_name, s_type, best.get("start_time", 0))
         
+        citations = []
+        for chunk in top_chunks:
+            cb_name, cd_name, cs_type, cloc = _resolve_blob_info(chunk, video_blob_name, video_map)
+            cpath = _get_image_for_chunk(cb_name, cs_type, chunk.get("start_time", 0))
+            citations.append({
+                "file_name": cd_name or cb_name or "Document",
+                "source_type": cs_type,
+                "location": cloc or (f"{chunk.get('start_time', 0):.2f}s" if cs_type == "video" else f"Page {int(chunk.get('start_time', 1))}"),
+                "image_path": cpath,
+            })
+
         snapshots = [{
             "image_path": path,
-            "timestamp": best["start_time"],
-            "video_title": d_name
+            "timestamp": best.get("start_time", 0),
+            "video_title": d_name,
+            "location": loc or "",
+            "source_type": s_type
         }]
         
         answer_text = call_vision_model(context_text, [path] if path else [], question)
 
-    # Return standard fields for backward compatibility, plus the full list of snapshots & structured steps
+    # Return standard fields for backward compatibility, plus citations & full structured steps
     return {
         "text": answer_text,
         "image_path": snapshots[0]["image_path"] if snapshots else None,
         "timestamp": snapshots[0]["timestamp"] if snapshots else None,
         "snapshots": snapshots,
+        "citations": citations,
         "structured_steps": structured_steps,
         "context_used": context_text,
     }

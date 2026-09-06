@@ -30,11 +30,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response
 
 from ingest import ingest_video
+from document_indexer import ingest_document
 import config
 import knowledge_graph
 from query import answer_question
 
-app = FastAPI(title="Video Chatbot")
+app = FastAPI(title="Video & Knowledge Chatbot")
 
 app.add_middleware(
     CORSMiddleware,
@@ -69,23 +70,39 @@ def _save_registry():
 # Load saved videos at app startup
 VIDEOS: dict[str, dict] = _load_registry()
 JOBS: dict[str, dict] = {}
-# Populate JOBS dictionary for pre-existing videos so they show as "done"
+# Populate JOBS dictionary for pre-existing items so they show as "done"
 for j_id, v_data in VIDEOS.items():
     JOBS[j_id] = {"status": "done", "step": "Ready"}
 
 
 def _run_ingest_job(job_id: str, local_path: str, display_name: str, blob_name_hint: str):
     JOBS[job_id]["status"] = "running"
-    JOBS[job_id]["step"] = "Uploading + indexing (this can take a few minutes)..."
+    ext = os.path.splitext(local_path)[1].lower()
+    is_video_or_audio = ext in [".mp4", ".mov", ".avi", ".mkv", ".mp3", ".wav", ".m4a"]
+
     try:
-        vi_video_id, blob_name = ingest_video(local_path, display_name)
+        if is_video_or_audio:
+            JOBS[job_id]["step"] = "Processing media via Azure Video Indexer..."
+            vi_video_id, blob_name = ingest_video(local_path, display_name)
+            s_type = "audio" if ext in [".mp3", ".wav", ".m4a"] else "video"
+            VIDEOS[job_id] = {
+                "vi_video_id": vi_video_id,
+                "blob_name": blob_name,
+                "display_name": display_name,
+                "source_type": s_type,
+            }
+        else:
+            JOBS[job_id]["step"] = "Extracting content via Azure Document Intelligence..."
+            doc_id, blob_name, s_type = ingest_document(local_path, display_name)
+            VIDEOS[job_id] = {
+                "vi_video_id": doc_id,
+                "blob_name": blob_name,
+                "display_name": display_name,
+                "source_type": s_type,
+            }
+
         JOBS[job_id]["status"] = "done"
         JOBS[job_id]["step"] = "Ready"
-        VIDEOS[job_id] = {
-            "vi_video_id": vi_video_id,
-            "blob_name": blob_name,
-            "display_name": display_name,
-        }
         _save_registry()
     except Exception as e:
         JOBS[job_id]["status"] = "error"
@@ -100,17 +117,14 @@ def _run_ingest_job(job_id: str, local_path: str, display_name: str, blob_name_h
 
 @app.post("/api/upload")
 async def upload_video(file: UploadFile, display_name: str = Form(...)):
-    """Accepts a video file from the browser, saves it locally, and kicks
-    off ingestion in a background thread so the request returns instantly."""
-    suffix = os.path.splitext(file.filename or "video.mp4")[1] or ".mp4"
+    """Accepts any video, audio, document, spreadsheet, or image file,
+    saves it locally, and kicks off ingestion in a background thread."""
+    suffix = os.path.splitext(file.filename or "file.mp4")[1] or ".mp4"
     tmp_path = os.path.join(tempfile.gettempdir(), f"upload_{uuid.uuid4()}{suffix}")
     with open(tmp_path, "wb") as f:
         f.write(await file.read())
 
     job_id = str(uuid.uuid4())
-    # NOTE: ingest_video() generates its own uuid for the blob name internally
-    # and prints it — we don't have it until ingestion finishes, so we surface
-    # it via the /api/status endpoint once the job is done (see VIDEOS dict).
     JOBS[job_id] = {"status": "queued", "step": "Queued"}
 
     thread = threading.Thread(
@@ -125,14 +139,15 @@ async def upload_video(file: UploadFile, display_name: str = Form(...)):
 
 @app.get("/api/videos")
 def get_videos():
-    """Returns all previously ingested videos from the persistent registry."""
+    """Returns all previously ingested files from the persistent registry."""
     items = []
     for j_id, v in VIDEOS.items():
         items.append({
             "job_id": j_id,
-            "display_name": v.get("display_name", "Untitled Video"),
+            "display_name": v.get("display_name", "Untitled File"),
             "vi_video_id": v.get("vi_video_id"),
-            "blob_name": v.get("blob_name")
+            "blob_name": v.get("blob_name"),
+            "source_type": v.get("source_type", "video"),
         })
     return items
 
@@ -161,7 +176,14 @@ async def ask(question: str = Form(...), job_id: str = Form("all")):
             video_blob_name = video.get("blob_name")
             video_id = video.get("vi_video_id")
     
-    video_map = {v["vi_video_id"]: {"blob_name": v["blob_name"], "display_name": v.get("display_name", "")} for v in VIDEOS.values() if "vi_video_id" in v}
+    video_map = {
+        v["vi_video_id"]: {
+            "blob_name": v.get("blob_name"),
+            "display_name": v.get("display_name", ""),
+            "source_type": v.get("source_type", "video"),
+        }
+        for v in VIDEOS.values() if "vi_video_id" in v
+    }
 
     try:
         result = answer_question(
@@ -181,7 +203,9 @@ async def ask(question: str = Form(...), job_id: str = Form("all")):
                 b64 = base64.b64encode(f.read()).decode()
             snapshots_response.append({
                 "image_base64": b64,
-                "timestamp": snap["timestamp"]
+                "timestamp": snap["timestamp"],
+                "source_type": snap.get("source_type", "video"),
+                "location": snap.get("location", ""),
             })
 
     structured_steps_response = None
@@ -197,7 +221,9 @@ async def ask(question: str = Form(...), job_id: str = Form("all")):
                 "title": step.get("title"),
                 "description": step.get("description"),
                 "image_base64": b64,
-                "timestamp": step.get("timestamp")
+                "timestamp": step.get("timestamp"),
+                "source_type": step.get("source_type", "video"),
+                "location": step.get("location", ""),
             })
 
     # Backward compatible fields for older/simple requests
@@ -209,6 +235,7 @@ async def ask(question: str = Form(...), job_id: str = Form("all")):
         "timestamp": first_timestamp,
         "image_base64": first_image,
         "snapshots": snapshots_response,
+        "citations": result.get("citations", []),
         "structured_steps": structured_steps_response,
     }
 

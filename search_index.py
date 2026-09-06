@@ -121,6 +121,6 @@ def search_top_chunks(query: str, video_id: str = None, video_map: dict = None, 
         search_text=None,
         vector_queries=[vector_query],
         filter=filter_expr,
-        select=["id", "video_id", "text", "start_time", "end_time", "keyframe_thumbnail_ids"],
+        select=["id", "video_id", "source_type", "text", "start_time", "end_time", "keyframe_thumbnail_ids"],
     )
     return list(results)

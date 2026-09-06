@@ -451,7 +451,7 @@
     <div style="width: 100%; height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
         <!-- Professional Clean Header Bar -->
         <header style="width: 100%; height: 56px; background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 0 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: center; position: relative; box-sizing: border-box; flex-shrink: 0;">
-            <h1 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #0f172a; letter-spacing: -0.2px; text-align: center;">Video Intelligence Assistant</h1>
+            <h1 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #0f172a; letter-spacing: -0.2px; text-align: center;">Universal Knowledge Assistant</h1>
         </header>
 
         <div class="container">
@@ -463,25 +463,26 @@
         <!-- LEFT SIDEBAR -->
         <div class="sidebar">
             <div class="glass-panel">
-                <h2 style="margin-top: 0; margin-bottom: 0.75rem;">Select Existing Video</h2>
+                <h2 style="margin-top: 0; margin-bottom: 0.75rem;">Select Ingested File</h2>
                 <div class="form-group" style="margin-bottom: 0;">
-                    <label for="video-select">Previously Ingested Videos</label>
+                    <label for="video-select">Previously Ingested Media & Documents</label>
                     <select id="video-select" style="background: #ffffff; border: 1px solid #cbd5e1; color: var(--text-primary); padding: 0.75rem; border-radius: 8px; font-family: inherit; outline: none; width: 100%;">
-                        <option value="">-- Choose a Video --</option>
+                        <option value="">-- Choose a File --</option>
                     </select>
                 </div>
             </div>
 
             <div class="glass-panel">
-                <h2>Ingest New Video</h2>
+                <h2>Ingest New File</h2>
                 <form id="upload-form">
                     <div class="form-group">
-                        <label for="display-name">Video Name</label>
-                        <input type="text" id="display-name" required placeholder="e.g. Tutorial V1">
+                        <label for="display-name">Display Name</label>
+                        <input type="text" id="display-name" required placeholder="e.g. Q3 Financial Report">
                     </div>
                     <div class="form-group">
-                        <label for="video-file">Media File (.mp4, .mp3, .wav, .m4a)</label>
-                        <input type="file" id="video-file" accept="video/*,audio/*,.mp4,.mp3,.wav,.m4a,.mov,.mkv" required>
+                        <label for="video-file">Media or Document File</label>
+                        <input type="file" id="video-file" accept="video/*,audio/*,.mp4,.mp3,.wav,.m4a,.mov,.pdf,.docx,.xlsx,.txt,image/*,.png,.jpg,.jpeg,.webp" required>
+                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Supports Video, Audio, PDF, Word, Excel, and Images</div>
                     </div>
                     <button type="submit" id="upload-btn">Upload & Ingest</button>
                 </form>
@@ -688,29 +689,37 @@
 
         const videoSelect = document.getElementById('video-select');
 
-        // Fetch existing videos on load
+        // Fetch existing videos and documents on load
         async function loadExistingVideos() {
             try {
                 const res = await fetch('/api/videos');
                 if (!res.ok) return;
                 const videos = await res.json();
                 
-                videoSelect.innerHTML = '<option value="all">🌐 All Videos (Search Entire Library)</option>';
+                videoSelect.innerHTML = '<option value="all">🌐 All Files (Search Entire Library)</option>';
                 videos.forEach(v => {
                     const opt = document.createElement('option');
                     opt.value = v.job_id;
-                    opt.textContent = v.display_name;
+                    let icon = '🎬';
+                    const st = (v.source_type || '').toLowerCase();
+                    if (st === 'audio') icon = '🎵';
+                    else if (st === 'pdf') icon = '📄';
+                    else if (st === 'docx') icon = '📝';
+                    else if (st === 'xlsx') icon = '📊';
+                    else if (st === 'txt') icon = '📃';
+                    else if (st === 'image') icon = '🖼️';
+                    opt.textContent = `${icon} ${v.display_name}`;
                     videoSelect.appendChild(opt);
                 });
 
-                // Enable chat by default for All Videos
+                // Enable chat by default for All Files
                 questionInput.disabled = false;
                 sendBtn.disabled = false;
                 statusBadge.className = 'status-badge status-done';
                 statusBadge.innerText = 'READY';
-                statusStep.innerText = 'Searching across all videos in your library!';
+                statusStep.innerText = 'Searching across all media and documents in your library!';
             } catch (err) {
-                console.error("Failed to load existing videos", err);
+                console.error("Failed to load existing files", err);
             }
         }
         loadExistingVideos();
@@ -721,9 +730,9 @@
             statusBadge.className = 'status-badge status-done';
             statusBadge.innerText = 'READY';
             if (selectedJobId === 'all') {
-                statusStep.innerText = 'Searching across all videos in your library!';
+                statusStep.innerText = 'Searching across all media and documents in your library!';
             } else {
-                statusStep.innerText = 'Ready to chat with selected video!';
+                statusStep.innerText = 'Ready to chat with selected file!';
             }
             questionInput.disabled = false;
             sendBtn.disabled = false;
@@ -840,20 +849,49 @@
             return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
-        function appendMessage(role, text, imageB64 = null, timestamp = null, snapshots = null, structuredSteps = null) {
+        function appendMessage(role, text, imageB64 = null, timestamp = null, snapshots = null, structuredSteps = null, citations = null) {
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${role}`;
             
             const parsedText = window.marked ? marked.parse(text) : text;
             let innerHTML = `<div class="bubble">${parsedText}</div>`;
             
+            // Citations Pill Container
+            if (citations && citations.length > 0) {
+                innerHTML += `<div class="citations-container" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem;">`;
+                citations.forEach(cit => {
+                    let icon = '📄';
+                    const st = (cit.source_type || '').toLowerCase();
+                    if (st === 'video') icon = '🎬';
+                    else if (st === 'audio') icon = '🎵';
+                    else if (st === 'pdf') icon = '📄';
+                    else if (st === 'docx') icon = '📝';
+                    else if (st === 'xlsx') icon = '📊';
+                    else if (st === 'image') icon = '🖼️';
+                    else if (st === 'txt') icon = '📃';
+
+                    innerHTML += `
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 10px; font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                            <span>${icon}</span>
+                            <strong>${cit.file_name}</strong>
+                            <span style="color: #cbd5e1;">•</span>
+                            <span style="color: var(--shell-red); font-weight: 600;">${cit.location}</span>
+                        </div>
+                    `;
+                });
+                innerHTML += `</div>`;
+            }
+
             if (structuredSteps && structuredSteps.length > 0) {
                 innerHTML += `<div class="structured-steps-container" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; width: 100%;">`;
                 structuredSteps.forEach(step => {
                     const stepDesc = window.marked ? marked.parse(step.description || '') : (step.description || '');
                     innerHTML += `
                         <div class="step-card" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid var(--shell-yellow); border-radius: 12px; padding: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-                            <h4 style="margin: 0 0 0.5rem 0; color: var(--shell-red); font-size: 0.95rem; font-weight: 700;">Step ${step.step_number}: ${step.title}</h4>
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <h4 style="margin: 0; color: var(--shell-red); font-size: 0.95rem; font-weight: 700;">Step ${step.step_number}: ${step.title}</h4>
+                                ${step.location ? `<span style="font-size: 0.75rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #64748b; font-weight: 600;">📍 ${step.location}</span>` : ''}
+                            </div>
                             <div class="step-description" style="font-size: 0.9rem; color: #334155; line-height: 1.5; margin-bottom: 0.75rem;">${stepDesc}</div>
                             ${step.image_base64 ? `
                                 <div class="snapshot-container" style="position: relative; margin-top: 0.5rem;">
@@ -868,18 +906,20 @@
             } else if (snapshots && snapshots.length > 0) {
                 innerHTML += `<div class="snapshots-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 0.75rem; margin-top: 1rem; width: 100%;">`;
                 snapshots.forEach(snap => {
-                    innerHTML += `
-                        <div class="snapshot-container" style="margin-top: 0; position: relative;">
-                            <img src="data:image/jpeg;base64,${snap.image_base64}" alt="Video Frame" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color);">
-                            <div class="timestamp-badge" style="position: absolute; bottom: 8px; right: 8px; background: rgba(15,23,42,0.85); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-family: monospace;">${formatTime(snap.timestamp)}</div>
-                        </div>
-                    `;
+                    if (snap.image_base64) {
+                        innerHTML += `
+                            <div class="snapshot-container" style="margin-top: 0; position: relative;">
+                                <img src="data:image/jpeg;base64,${snap.image_base64}" alt="Media Frame" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color);">
+                                <div class="timestamp-badge" style="position: absolute; bottom: 8px; right: 8px; background: rgba(15,23,42,0.85); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-family: monospace;">${formatTime(snap.timestamp)}</div>
+                            </div>
+                        `;
+                    }
                 });
                 innerHTML += `</div>`;
             } else if (imageB64) {
                 innerHTML += `
                     <div class="snapshot-container">
-                        <img src="data:image/jpeg;base64,${imageB64}" alt="Video Frame">
+                        <img src="data:image/jpeg;base64,${imageB64}" alt="Media Frame">
                         <div class="timestamp-badge">${formatTime(timestamp)}</div>
                     </div>
                 `;
@@ -1011,7 +1051,7 @@
                 typingIndicator.style.display = 'none';
                 
                 if (res.ok) {
-                    appendMessage('bot', data.text, data.image_base64, data.timestamp, data.snapshots, data.structured_steps);
+                    appendMessage('bot', data.text, data.image_base64, data.timestamp, data.snapshots, data.structured_steps, data.citations);
                     const lastBotMsg = chatHistory.querySelector('.message.bot:last-child');
                     const playBtn = lastBotMsg ? lastBotMsg.querySelector('.play-audio-btn') : null;
                     speak(data.text, playBtn, true);

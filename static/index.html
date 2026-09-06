@@ -621,7 +621,7 @@
                 <h2>Status</h2>
                 <div id="status-card">
                     <div class="status-badge status-idle" id="status-badge">Waiting</div>
-                    <div id="status-step">Upload a video to begin the pipeline.</div>
+                    <div id="status-step">Upload a document or media file to begin the pipeline.</div>
                 </div>
                 
                 <div style="margin-top: auto; display: flex; align-items: center; gap: 0.5rem; padding-top: 1rem;">
@@ -660,7 +660,7 @@
                     <!-- Welcome message -->
                     <div class="message bot">
                         <div class="bubble">
-                            Hello! Once your video finishes processing and the status reads "READY", you can ask me anything about what happens in the video.
+                            Hello! You can ask questions across all your ingested documents (PDF, Word, Excel, TXT), videos, and audio. Select a specific file from the dropdown or search the entire library!
                         </div>
                     </div>
                 </div>
@@ -670,7 +670,7 @@
                 </div>
 
                 <form id="chat-form" class="chat-input-area">
-                    <input type="text" id="question-input" placeholder="Ask a question about the video..." disabled required autocomplete="off">
+                    <input type="text" id="question-input" placeholder="Ask a question about your documents or media..." disabled required autocomplete="off">
                     <button type="submit" id="send-btn" disabled>Send</button>
                 </form>
             </div>

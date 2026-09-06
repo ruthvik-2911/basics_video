@@ -140,6 +140,8 @@ async def upload_video(file: UploadFile, display_name: str = Form(...)):
 @app.get("/api/videos")
 def get_videos():
     """Returns all previously ingested files from the persistent registry."""
+    global VIDEOS
+    VIDEOS = _load_registry()
     items = []
     for j_id, v in VIDEOS.items():
         items.append({

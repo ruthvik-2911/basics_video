@@ -1102,7 +1102,12 @@
             if (!html || typeof html !== 'string') return html || '';
             return html.replace(/\[Source:\s*([^|\]]+)\|\s*([^\]]+)\]/gi, (match, fname, loc) => {
                 const name = (fname || '').trim();
-                const location = (loc || '').trim();
+                let location = (loc || '').trim();
+                location = location.replace(/\s*-\s*Table\s*\(Rows[^\)]+\)/gi, '')
+                                   .replace(/\s*\(Rows[^\)]+\)/gi, '')
+                                   .replace(/\s*\(Part\s*\d+\)/gi, '')
+                                   .replace(/^Sheet Data\s*-\s*/gi, '')
+                                   .trim();
                 let icon = '📄';
                 const locLower = location.toLowerCase();
                 if (location.includes(':') || locLower.includes('min') || locLower.includes('sec') || locLower.includes('timestamp')) {

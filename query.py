@@ -127,6 +127,17 @@ def format_citation_badge(file_name: str, source_type: str, location: str) -> st
         return f"📄 Document: {file_name} ({location})"
 
 
+def _clean_location_label(loc: str) -> str:
+    if not loc:
+        return ""
+    import re
+    cleaned = re.sub(r"\s*-\s*Table\s*\(Rows[^\)]+\)", "", loc, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s*\(Rows[^\)]+\)", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s*\(Part\s*\d+\)", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"^Sheet Data\s*-\s*", "", cleaned, flags=re.IGNORECASE)
+    return cleaned.strip()
+
+
 def _resolve_blob_info(chunk: dict, fallback_blob_name: str, video_map: dict) -> tuple[str, str, str, str]:
     """Returns (blob_name, display_name, source_type, location) for a chunk."""
     chunk_id = chunk.get("video_id")
@@ -136,7 +147,7 @@ def _resolve_blob_info(chunk: dict, fallback_blob_name: str, video_map: dict) ->
     loc = ""
     for thumb in chunk.get("keyframe_thumbnail_ids", []) or []:
         if thumb and thumb.startswith("loc:"):
-            loc = thumb[4:]
+            loc = _clean_location_label(thumb[4:])
             break
 
     if video_map and chunk_id in video_map:

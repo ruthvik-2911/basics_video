@@ -141,10 +141,9 @@ def extract_document_chunks(doc_id: str, file_path: str, display_name: str) -> l
                     sub = words[j:j + chunk_size]
                     if not sub:
                         break
-                    part_str = f"Part {j//stride + 1}" if len(words) > chunk_size else ""
-                    location_label = f"Page {page_num}" if not part_str else f"Page {page_num} ({part_str})"
+                    location_label = f"Page {page_num}"
                     if source_type == "xlsx":
-                        location_label = f"Sheet Data - Page {page_num}"
+                        location_label = f"Page {page_num}"
                     elif source_type == "image":
                         location_label = f"Image: {display_name}"
 
@@ -159,18 +158,18 @@ def extract_document_chunks(doc_id: str, file_path: str, display_name: str) -> l
             else:
                 location_label = f"Page {page_num}"
                 if source_type == "xlsx":
-                    location_label = f"Sheet Data - Page {page_num}"
+                    location_label = f"Page {page_num}"
                 elif source_type == "image":
                     location_label = f"Image: {display_name}"
 
-                    chunks.append({
-                        "doc_id": doc_id,
-                        "display_name": display_name,
-                        "source_type": source_type,
-                        "location": location_label,
-                        "page_num": float(page_num),
-                        "text": page_text,
-                    })
+                chunks.append({
+                    "doc_id": doc_id,
+                    "display_name": display_name,
+                    "source_type": source_type,
+                    "location": location_label,
+                    "page_num": float(page_num),
+                    "text": page_text,
+                })
 
     # Index tabular data with precise row & column citations if tables exist
     tables = analyze_result.get("tables", [])
@@ -206,11 +205,7 @@ def extract_document_chunks(doc_id: str, file_path: str, display_name: str) -> l
                 
                 table_text = "\n".join(row_lines)
                 if table_text.strip():
-                    if source_type == "xlsx":
-                        tbl_loc = f"Sheet (Rows {start_r + 1}-{end_r})"
-                    else:
-                        tbl_loc = f"Page {table_page} - Table (Rows {start_r + 1}-{end_r})"
-
+                    tbl_loc = f"Page {table_page}"
                     chunks.append({
                         "doc_id": doc_id,
                         "display_name": display_name,

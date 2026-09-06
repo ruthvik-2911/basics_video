@@ -493,6 +493,34 @@
             40% { transform: scale(1); }
         }
 
+        /* Inline Citations Styling */
+        .inline-citation-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f0f7ff;
+            color: var(--kpmg-navy);
+            border: 1px solid rgba(0, 94, 184, 0.3);
+            border-radius: 6px;
+            padding: 2px 7px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-left: 6px;
+            margin-right: 2px;
+            vertical-align: baseline;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            white-space: nowrap;
+        }
+
+        .inline-citation-tag .cit-time {
+            background: var(--kpmg-blue);
+            color: #ffffff;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.72rem;
+        }
+
         /* Language Settings & Precision Citations Styling */
         .sidebar-settings-bar {
             margin-top: 0.75rem;
@@ -1058,7 +1086,8 @@
         // Clean text for speech synthesis so markdown syntax isn't read aloud
         function cleanTextForSpeech(raw) {
             let t = unwrapContent(raw);
-            t = t.replace(/#{1,6}\s+/g, '')
+            t = t.replace(/\[Source:\s*[^|\]]+\|\s*[^\]]+\]/gi, '')
+                 .replace(/#{1,6}\s+/g, '')
                  .replace(/\*\*([^*]+)\*\*/g, '$1')
                  .replace(/\*([^*]+)\*/g, '$1')
                  .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
@@ -1066,6 +1095,21 @@
                  .replace(/^[*-]\s+/gm, '')
                  .replace(/^\d+\.\s+/gm, '');
             return t.trim();
+        }
+
+        // Replace [Source: Name | Loc] with interactive inline citation badge
+        function replaceInlineCitations(html) {
+            if (!html || typeof html !== 'string') return html || '';
+            return html.replace(/\[Source:\s*([^|\]]+)\|\s*([^\]]+)\]/gi, (match, fname, loc) => {
+                const name = (fname || '').trim();
+                const location = (loc || '').trim();
+                let icon = '📄';
+                const locLower = location.toLowerCase();
+                if (location.includes(':') || locLower.includes('min') || locLower.includes('sec') || locLower.includes('timestamp')) {
+                    icon = '🎬';
+                }
+                return `<span class="inline-citation-tag" title="Source: ${name} • ${location}"><span>${icon}</span> <strong>${name}</strong> ${location ? `<span class="cit-time">${location}</span>` : ''}</span>`;
+            });
         }
 
         // Text-to-Speech Helper using Azure Neural Voice
@@ -1218,11 +1262,13 @@
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${role}`;
             
-            const parsedText = window.marked ? marked.parse(cleanText) : cleanText;
+            let parsedText = window.marked ? marked.parse(cleanText) : cleanText;
+            parsedText = replaceInlineCitations(parsedText);
             let innerHTML = `<div class="bubble">${parsedText}</div>`;
             
-            // Precision Citations Pill Container
-            if (citations && citations.length > 0) {
+            // Only render bottom citations pill container if NO inline citations are present in the answer
+            const hasInlineCitations = /\[Source:\s*[^|\]]+\|\s*[^\]]+\]/i.test(cleanText) || parsedText.includes('inline-citation-tag');
+            if (!hasInlineCitations && citations && citations.length > 0) {
                 innerHTML += `<div class="citations-container" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem;">`;
                 citations.forEach(cit => {
                     const meta = getCitationMeta(cit);

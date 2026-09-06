@@ -59,13 +59,21 @@ def call_vision_model(context_text: str, frame_paths: list[str], question: str, 
             f"{lang_instruction}"
         )
     else:
+        citation_instruction = (
+            "\n\nINLINE CITATION REQUIREMENTS:\n"
+            "- You MUST place an inline citation badge immediately beside each paragraph, bullet point, or answer statement that comes from a context snippet.\n"
+            "- Format inline citations strictly as `[Source: File Name | Location]` using the exact file name and location provided in the snippet headers (e.g., `[Source: Azure Free Account Walkthrough | 00:30]` or `[Source: Document.pdf | Page 2]`).\n"
+            "- Do NOT gather or list citations at the end of your response. Insert each citation badge inline right next to its corresponding sentence or paragraph."
+        )
+
         lang_instruction = ""
         if language and language.lower() != "english":
             lang_instruction = (
                 f"\n\nCRITICAL LANGUAGE & FORMATTING RULES:\n"
                 f"1. Language: Answer entirely in natural, fluent {language}.\n"
                 "2. NO JSON: Do NOT output JSON, JSON keys, quotes around the answer, or curly braces. Output clean Markdown directly.\n"
-                "3. Beautiful Structure: Structure your response cleanly using rich Markdown. Start with a direct introductory summary sentence, use bold highlights (e.g. **important point**), and use clean bullet points or numbered lists for readability just like professional documentation."
+                "3. Beautiful Structure: Structure your response cleanly using rich Markdown. Start with a direct introductory summary sentence, use bold highlights (e.g. **important point**), and use clean bullet points or numbered lists.\n"
+                "4. Inline Citations: At the end of each translated paragraph or key point, include the exact inline citation badge `[Source: File Name | Location]` corresponding to the snippet source."
             )
         else:
             lang_instruction = (
@@ -81,6 +89,7 @@ def call_vision_model(context_text: str, frame_paths: list[str], question: str, 
             f"User question: {question}\n\n"
             "Answer clearly, thoroughly, and directly. Ground your answer in what's visible in the frame "
             "and what's said/shown in the context. If the context doesn't actually answer the question, say so."
+            f"{citation_instruction}"
             f"{lang_instruction}"
         )
 

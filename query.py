@@ -259,7 +259,6 @@ def answer_question(question: str, video_blob_name: str = None, video_id: str = 
         if not top_chunks:
             return {"text": "I couldn't find anything relevant across your knowledge library.", "snapshots": [], "citations": [], "structured_steps": None}
 
-        context_text = "\n\n".join(c["text"] for c in top_chunks)
         best = top_chunks[0]
         b_name, d_name, s_type, loc = _resolve_blob_info(best, video_blob_name, video_map)
         path = _get_image_for_chunk(b_name, s_type, best.get("start_time", 0))
@@ -274,6 +273,7 @@ def answer_question(question: str, video_blob_name: str = None, video_id: str = 
                 final_best_loc = f"Page {int(best.get('start_time', 1))}"
 
         citations = []
+        context_blocks = []
         for chunk in top_chunks:
             cb_name, cd_name, cs_type, cloc = _resolve_blob_info(chunk, video_blob_name, video_map)
             cpath = _get_image_for_chunk(cb_name, cs_type, chunk.get("start_time", 0))
@@ -287,13 +287,17 @@ def answer_question(question: str, video_blob_name: str = None, video_id: str = 
                 else:
                     c_loc = f"Page {int(chunk.get('start_time', 1))}"
 
+            fname = cd_name or cb_name or "Document"
             citations.append({
-                "file_name": cd_name or cb_name or "Document",
+                "file_name": fname,
                 "source_type": cs_type,
                 "location": c_loc,
-                "citation_badge": format_citation_badge(cd_name or cb_name or "Document", cs_type, c_loc),
+                "citation_badge": format_citation_badge(fname, cs_type, c_loc),
                 "image_path": cpath,
             })
+            context_blocks.append(f"[Source: {fname} | {c_loc}]\n{chunk['text']}")
+
+        context_text = "\n\n".join(context_blocks)
 
         best_badge = format_citation_badge(d_name or b_name or "File", s_type, final_best_loc)
         snapshots = [{

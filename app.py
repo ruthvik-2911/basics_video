@@ -166,7 +166,7 @@ def get_status(job_id: str):
 
 
 @app.post("/api/ask")
-async def ask(question: str = Form(...), job_id: str = Form("all")):
+async def ask(question: str = Form(...), job_id: str = Form("all"), language: str = Form("English")):
     video_blob_name = None
     video_id = None
     
@@ -190,7 +190,8 @@ async def ask(question: str = Form(...), job_id: str = Form("all")):
             question, 
             video_blob_name=video_blob_name, 
             video_id=video_id, 
-            video_map=video_map
+            video_map=video_map,
+            language=language
         )
     except Exception as e:
         traceback.print_exc()
@@ -206,6 +207,8 @@ async def ask(question: str = Form(...), job_id: str = Form("all")):
                 "timestamp": snap["timestamp"],
                 "source_type": snap.get("source_type", "video"),
                 "location": snap.get("location", ""),
+                "file_name": snap.get("video_title", ""),
+                "citation_badge": snap.get("citation_badge", ""),
             })
 
     structured_steps_response = None
@@ -224,6 +227,8 @@ async def ask(question: str = Form(...), job_id: str = Form("all")):
                 "timestamp": step.get("timestamp"),
                 "source_type": step.get("source_type", "video"),
                 "location": step.get("location", ""),
+                "file_name": step.get("file_name", ""),
+                "citation_badge": step.get("citation_badge", ""),
             })
 
     # Backward compatible fields for older/simple requests
@@ -240,10 +245,29 @@ async def ask(question: str = Form(...), job_id: str = Form("all")):
     }
 
 
+VOICE_MAP = {
+    "english": ("en-US", "en-US-JennyNeural"),
+    "hindi": ("hi-IN", "hi-IN-SwaraNeural"),
+    "telugu": ("te-IN", "te-IN-ShrutiNeural"),
+    "tamil": ("ta-IN", "ta-IN-PallaviNeural"),
+    "kannada": ("kn-IN", "kn-IN-SapnaNeural"),
+    "spanish": ("es-ES", "es-ES-ElviraNeural"),
+    "french": ("fr-FR", "fr-FR-DeniseNeural"),
+    "german": ("de-DE", "de-DE-KatjaNeural"),
+    "japanese": ("ja-JP", "ja-JP-NanamiNeural"),
+}
+
+
 @app.post("/api/tts")
-async def text_to_speech(text: str = Form(...), voice: str = Form("en-US-JennyNeural")):
+async def text_to_speech(text: str = Form(...), voice: str = Form(None), language: str = Form("English")):
     if not config.AZURE_SPEECH_KEY or not config.AZURE_SPEECH_REGION:
         raise HTTPException(500, "AZURE_SPEECH_KEY or AZURE_SPEECH_REGION not configured in .env")
+
+    # Pick voice according to chosen language
+    lang_key = (language or "english").lower().strip()
+    xml_lang, selected_voice = VOICE_MAP.get(lang_key, ("en-US", "en-US-JennyNeural"))
+    if voice:
+        selected_voice = voice
 
     # Clean markdown syntax for clean spoken SSML
     clean_text = re.sub(r'[\*\#\_`]', '', text)
@@ -255,12 +279,11 @@ async def text_to_speech(text: str = Form(...), voice: str = Form("en-US-JennyNe
         "Ocp-Apim-Subscription-Key": config.AZURE_SPEECH_KEY,
         "Content-Type": "application/ssml+xml",
         "X-Microsoft-OutputFormat": "audio-16khz-32kbitrate-mono-mp3",
-        "User-Agent": "VideoIntelligenceAssistant"
+        "User-Agent": "UniversalKnowledgeAssistant"
     }
 
-    lang = "en-IN" if "en-IN" in voice else "en-US"
-    ssml = f"""<speak version='1.0' xml:lang='{lang}'>
-    <voice xml:lang='{lang}' xml:gender='Female' name='{voice}'>
+    ssml = f"""<speak version='1.0' xml:lang='{xml_lang}'>
+    <voice xml:lang='{xml_lang}' xml:gender='Female' name='{selected_voice}'>
         {clean_text}
     </voice>
 </speak>"""

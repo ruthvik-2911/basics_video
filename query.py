@@ -78,6 +78,20 @@ def _get_dynamic_step_count(chunks: list) -> int:
         return 6
 
 
+def format_citation_badge(file_name: str, source_type: str, location: str) -> str:
+    s_type = (source_type or "document").lower()
+    if s_type == "video":
+        return f"🎬 Video: {file_name} [{location}]"
+    elif s_type == "audio":
+        return f"🎵 Audio: {file_name} [{location}]"
+    elif s_type == "xlsx":
+        return f"📊 Spreadsheet: {file_name} ({location})"
+    elif s_type == "image":
+        return f"🖼️ Image: {file_name}"
+    else:
+        return f"📄 Document: {file_name} ({location})"
+
+
 def _resolve_blob_info(chunk: dict, fallback_blob_name: str, video_map: dict) -> tuple[str, str, str, str]:
     """Returns (blob_name, display_name, source_type, location) for a chunk."""
     chunk_id = chunk.get("video_id")
@@ -124,7 +138,7 @@ def _get_image_for_chunk(blob_name: str, source_type: str, timestamp_or_page: fl
     return None
 
 
-def answer_question(question: str, video_blob_name: str = None, video_id: str = None, video_map: dict = None) -> dict:
+def answer_question(question: str, video_blob_name: str = None, video_id: str = None, video_map: dict = None, language: str = "English") -> dict:
     structured_steps = None
 
     # Determine if it's a general summary query
@@ -155,23 +169,34 @@ def answer_question(question: str, video_blob_name: str = None, video_id: str = 
             if path:
                 frame_paths.append(path)
             
-            # Record citation
+            # Format clean location string
+            final_loc = loc
+            if not final_loc:
+                if s_type == "video":
+                    mins = int(chunk.get('start_time', 0) // 60)
+                    secs = int(chunk.get('start_time', 0) % 60)
+                    final_loc = f"{mins:02d}:{secs:02d}"
+                else:
+                    final_loc = f"Page {int(chunk.get('start_time', 1))}"
+
             citation_item = {
                 "file_name": d_name or b_name or "Document",
                 "source_type": s_type,
-                "location": loc or (f"{chunk.get('start_time', 0):.2f}s" if s_type == "video" else f"Page {int(chunk.get('start_time', 1))}"),
+                "location": final_loc,
+                "citation_badge": format_citation_badge(d_name or b_name or "Document", s_type, final_loc),
                 "image_path": path,
             }
             citations.append(citation_item)
             snapshots.append({
                 "image_path": path,
                 "timestamp": chunk.get("start_time", 0),
-                "video_title": d_name,
-                "location": loc or "",
-                "source_type": s_type
+                "video_title": d_name or b_name or "File",
+                "location": final_loc,
+                "source_type": s_type,
+                "citation_badge": citation_item["citation_badge"],
             })
         
-        answer_raw = call_vision_model(context_text, frame_paths, question)
+        answer_raw = call_vision_model(context_text, frame_paths, question, language=language)
         try:
             parsed = json.loads(answer_raw)
             answer_text = parsed.get("summary", "Here is the step-by-step breakdown:")
@@ -179,6 +204,7 @@ def answer_question(question: str, video_blob_name: str = None, video_id: str = 
             structured_steps = []
             for idx, step in enumerate(raw_steps):
                 snap = snapshots[idx] if idx < len(snapshots) else snapshots[-1]
+                s_badge = snap.get("citation_badge") or format_citation_badge(snap.get("video_title", "File"), snap.get("source_type", "video"), snap.get("location", ""))
                 structured_steps.append({
                     "step_number": step.get("step_number", idx + 1),
                     "title": step.get("title", f"Step {idx+1}"),
@@ -186,7 +212,9 @@ def answer_question(question: str, video_blob_name: str = None, video_id: str = 
                     "image_path": snap["image_path"],
                     "timestamp": snap["timestamp"],
                     "source_type": snap.get("source_type", "video"),
-                    "location": snap.get("location", "")
+                    "location": snap.get("location", ""),
+                    "file_name": snap.get("video_title", ""),
+                    "citation_badge": s_badge,
                 })
         except Exception:
             answer_text = answer_raw
@@ -201,32 +229,56 @@ def answer_question(question: str, video_blob_name: str = None, video_id: str = 
         b_name, d_name, s_type, loc = _resolve_blob_info(best, video_blob_name, video_map)
         path = _get_image_for_chunk(b_name, s_type, best.get("start_time", 0))
         
+        final_best_loc = loc
+        if not final_best_loc:
+            if s_type == "video":
+                mins = int(best.get('start_time', 0) // 60)
+                secs = int(best.get('start_time', 0) % 60)
+                final_best_loc = f"{mins:02d}:{secs:02d}"
+            else:
+                final_best_loc = f"Page {int(best.get('start_time', 1))}"
+
         citations = []
         for chunk in top_chunks:
             cb_name, cd_name, cs_type, cloc = _resolve_blob_info(chunk, video_blob_name, video_map)
             cpath = _get_image_for_chunk(cb_name, cs_type, chunk.get("start_time", 0))
+            
+            c_loc = cloc
+            if not c_loc:
+                if cs_type == "video":
+                    mins = int(chunk.get('start_time', 0) // 60)
+                    secs = int(chunk.get('start_time', 0) % 60)
+                    c_loc = f"{mins:02d}:{secs:02d}"
+                else:
+                    c_loc = f"Page {int(chunk.get('start_time', 1))}"
+
             citations.append({
                 "file_name": cd_name or cb_name or "Document",
                 "source_type": cs_type,
-                "location": cloc or (f"{chunk.get('start_time', 0):.2f}s" if cs_type == "video" else f"Page {int(chunk.get('start_time', 1))}"),
+                "location": c_loc,
+                "citation_badge": format_citation_badge(cd_name or cb_name or "Document", cs_type, c_loc),
                 "image_path": cpath,
             })
 
+        best_badge = format_citation_badge(d_name or b_name or "File", s_type, final_best_loc)
         snapshots = [{
             "image_path": path,
             "timestamp": best.get("start_time", 0),
-            "video_title": d_name,
-            "location": loc or "",
-            "source_type": s_type
+            "video_title": d_name or b_name or "File",
+            "location": final_best_loc,
+            "source_type": s_type,
+            "citation_badge": best_badge,
         }]
         
-        answer_text = call_vision_model(context_text, [path] if path else [], question)
+        answer_text = call_vision_model(context_text, [path] if path else [], question, language=language)
 
     # Return standard fields for backward compatibility, plus citations & full structured steps
     return {
         "text": answer_text,
         "image_path": snapshots[0]["image_path"] if snapshots else None,
         "timestamp": snapshots[0]["timestamp"] if snapshots else None,
+        "location": snapshots[0].get("location") if snapshots else "",
+        "file_name": snapshots[0].get("video_title") if snapshots else "",
         "snapshots": snapshots,
         "citations": citations,
         "structured_steps": structured_steps,

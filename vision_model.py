@@ -27,37 +27,43 @@ def _get_client() -> AzureOpenAI:
     return _client
 
 
-def call_vision_model(context_text: str, frame_paths: list[str], question: str) -> str:
+def call_vision_model(context_text: str, frame_paths: list[str], question: str, language: str = "English") -> str:
     is_multi_frame = len(frame_paths) > 1
+
+    lang_instruction = ""
+    if language and language.lower() != "english":
+        lang_instruction = f"\n\nCRITICAL LANGUAGE INSTRUCTION: You MUST output all response text, summaries, step titles, and explanations in {language}. Keep JSON structure keys unchanged, but translate all values into {language}."
 
     if is_multi_frame:
         prompt = (
-            "You are providing a step-by-step overview of a video using "
-            f"{len(frame_paths)} keyframe snapshots (ordered chronologically as Image 1, Image 2, etc.) "
-            "and transcript context.\n\n"
-            f"Transcript + OCR context:\n{context_text}\n\n"
+            "You are providing a step-by-step overview of a video or document collection using "
+            f"{len(frame_paths)} keyframe snapshots/images (ordered chronologically as Image 1, Image 2, etc.) "
+            "and transcript/document context.\n\n"
+            f"Context:\n{context_text}\n\n"
             f"User question: {question}\n\n"
             "Return a JSON object with this EXACT structure:\n"
             "{\n"
-            '  "summary": "Brief overall summary of the video",\n'
+            '  "summary": "Brief overall summary",\n'
             '  "steps": [\n'
             '    {\n'
             '      "step_number": 1,\n'
             '      "title": "Title for Step 1",\n'
-            '      "description": "Explanation for Step 1 based on Image 1 and transcript"\n'
+            '      "description": "Explanation for Step 1 based on Image 1 and context"\n'
             "    }\n"
             "  ]\n"
             "}\n\n"
             f"Ensure the 'steps' array contains exactly {len(frame_paths)} step items corresponding to Image 1 through Image {len(frame_paths)}."
+            f"{lang_instruction}"
         )
     else:
         prompt = (
-            "You are answering a question about a video, using an exact frame snapshot "
-            "grabbed at a relevant moment plus the transcript/on-screen text (OCR) from around that moment.\n\n"
-            f"Transcript + OCR context:\n{context_text}\n\n"
+            "You are answering a question about a video or document, using an exact frame snapshot "
+            "or document page context.\n\n"
+            f"Context:\n{context_text}\n\n"
             f"User question: {question}\n\n"
             "Answer clearly and directly. Ground your answer in what's visible in the frame "
             "and what's said/shown in the context. If the context doesn't actually answer the question, say so."
+            f"{lang_instruction}"
         )
 
     content = [{"type": "text", "text": prompt}]

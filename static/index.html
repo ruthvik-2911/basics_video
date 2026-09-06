@@ -445,6 +445,135 @@
             0%, 80%, 100% { transform: scale(0); }
             40% { transform: scale(1); }
         }
+
+        /* Language Settings & Precision Citations Styling */
+        .sidebar-settings-bar {
+            margin-top: 0.75rem;
+            padding: 0.65rem 0.85rem;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .sidebar-settings-bar:hover {
+            border-color: var(--shell-red);
+            background: #fffafa;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(221, 29, 33, 0.08);
+        }
+
+        .gear-spin {
+            font-size: 1.25rem;
+            transition: transform 0.4s ease;
+            display: inline-block;
+        }
+
+        .sidebar-settings-bar:hover .gear-spin {
+            transform: rotate(60deg);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border-radius: 16px;
+            width: 520px;
+            max-width: 92vw;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.2s ease-out;
+        }
+
+        .lang-card {
+            padding: 0.75rem 0.85rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .lang-card:hover {
+            border-color: #cbd5e1;
+            background: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .lang-card.active {
+            border-color: var(--shell-red);
+            background: #fef2f2;
+            box-shadow: 0 0 0 2px rgba(221, 29, 33, 0.15);
+        }
+
+        .citation-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            color: #334155;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            transition: background 0.15s ease;
+        }
+
+        .citation-pill:hover {
+            background: #ffffff;
+            border-color: #cbd5e1;
+        }
+
+        .citation-tag {
+            color: var(--shell-red);
+            font-weight: 700;
+            background: #fee2e2;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+
+        .step-citation-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 3px 8px;
+            border-radius: 6px;
+            color: #1e293b;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -498,6 +627,18 @@
                 <div style="margin-top: auto; display: flex; align-items: center; gap: 0.5rem; padding-top: 1rem;">
                     <input type="checkbox" id="tts-toggle" checked>
                     <label for="tts-toggle">Speak answers aloud</label>
+                </div>
+
+                <!-- Settings symbol on bottom-left corner of sidebar -->
+                <div class="sidebar-settings-bar" id="open-lang-settings" title="Change Output Response Language & Voice">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="gear-spin">⚙️</span>
+                        <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.2;">
+                            <span style="font-size: 0.72rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Output Language</span>
+                            <span id="current-lang-text" style="font-size: 0.88rem; font-weight: 700; color: var(--shell-red);">English 🇺🇸</span>
+                        </div>
+                    </div>
+                    <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 600;">Edit ›</span>
                 </div>
             </div>
         </div>
@@ -672,6 +813,19 @@
             }
         }
 
+        const SUPPORTED_LANGUAGES = [
+            { code: 'English', label: 'English', native: 'English', flag: '🇺🇸' },
+            { code: 'Hindi', label: 'Hindi', native: 'हिन्दी', flag: '🇮🇳' },
+            { code: 'Telugu', label: 'Telugu', native: 'తెలుగు', flag: '🇮🇳' },
+            { code: 'Tamil', label: 'Tamil', native: 'தமிழ்', flag: '🇮🇳' },
+            { code: 'Kannada', label: 'Kannada', native: 'ಕನ್ನಡ', flag: '🇮🇳' },
+            { code: 'Spanish', label: 'Spanish', native: 'Español', flag: '🇪🇸' },
+            { code: 'French', label: 'French', native: 'Français', flag: '🇫🇷' },
+            { code: 'German', label: 'German', native: 'Deutsch', flag: '🇩🇪' },
+            { code: 'Japanese', label: 'Japanese', native: '日本語', flag: '🇯🇵' },
+        ];
+
+        let selectedLanguage = localStorage.getItem('app_output_language') || 'English';
         let currentJobId = 'all';
         let pollInterval = null;
 
@@ -786,7 +940,7 @@
             try {
                 const formData = new FormData();
                 formData.append('text', text);
-                formData.append('voice', 'en-US-JennyNeural');
+                formData.append('language', selectedLanguage);
 
                 const res = await fetch('/api/tts', {
                     method: 'POST',
@@ -843,10 +997,39 @@
 
         // Format seconds to MM:SS
         function formatTime(seconds) {
-            if (!seconds) return "00:00";
+            if (!seconds && seconds !== 0) return "00:00";
             const m = Math.floor(seconds / 60);
             const s = Math.floor(seconds % 60);
             return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // Helper to format precision citation metadata
+        function getCitationMeta(item) {
+            let icon = '📄';
+            let typeLabel = 'Document';
+            const st = (item.source_type || '').toLowerCase();
+            if (st === 'video') { icon = '🎬'; typeLabel = 'Video'; }
+            else if (st === 'audio') { icon = '🎵'; typeLabel = 'Audio'; }
+            else if (st === 'pdf') { icon = '📄'; typeLabel = 'PDF Doc'; }
+            else if (st === 'docx') { icon = '📝'; typeLabel = 'Word Doc'; }
+            else if (st === 'xlsx') { icon = '📊'; typeLabel = 'Spreadsheet'; }
+            else if (st === 'image') { icon = '🖼️'; typeLabel = 'Image'; }
+            else if (st === 'txt') { icon = '📃'; typeLabel = 'Text Doc'; }
+
+            let loc = item.location || '';
+            if ((st === 'video' || st === 'audio') && (item.timestamp !== undefined && item.timestamp !== null)) {
+                loc = formatTime(item.timestamp);
+            }
+            if (loc && (st === 'video' || st === 'audio') && !loc.startsWith('[')) {
+                loc = `[${loc}]`;
+            }
+
+            return {
+                icon,
+                typeLabel,
+                loc,
+                file_name: item.file_name || item.video_title || 'Document'
+            };
         }
 
         function appendMessage(role, text, imageB64 = null, timestamp = null, snapshots = null, structuredSteps = null, citations = null) {
@@ -856,26 +1039,16 @@
             const parsedText = window.marked ? marked.parse(text) : text;
             let innerHTML = `<div class="bubble">${parsedText}</div>`;
             
-            // Citations Pill Container
+            // Precision Citations Pill Container
             if (citations && citations.length > 0) {
                 innerHTML += `<div class="citations-container" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem;">`;
                 citations.forEach(cit => {
-                    let icon = '📄';
-                    const st = (cit.source_type || '').toLowerCase();
-                    if (st === 'video') icon = '🎬';
-                    else if (st === 'audio') icon = '🎵';
-                    else if (st === 'pdf') icon = '📄';
-                    else if (st === 'docx') icon = '📝';
-                    else if (st === 'xlsx') icon = '📊';
-                    else if (st === 'image') icon = '🖼️';
-                    else if (st === 'txt') icon = '📃';
-
+                    const meta = getCitationMeta(cit);
                     innerHTML += `
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 10px; font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-                            <span>${icon}</span>
-                            <strong>${cit.file_name}</strong>
-                            <span style="color: #cbd5e1;">•</span>
-                            <span style="color: var(--shell-red); font-weight: 600;">${cit.location}</span>
+                        <div class="citation-pill" title="${meta.typeLabel}: ${meta.file_name} • ${meta.loc}">
+                            <span>${meta.icon}</span>
+                            <strong style="color: #1e293b;">${meta.file_name}</strong>
+                            ${meta.loc ? `<span class="citation-tag">${meta.loc}</span>` : ''}
                         </div>
                     `;
                 });
@@ -886,11 +1059,17 @@
                 innerHTML += `<div class="structured-steps-container" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; width: 100%;">`;
                 structuredSteps.forEach(step => {
                     const stepDesc = window.marked ? marked.parse(step.description || '') : (step.description || '');
+                    const stepMeta = getCitationMeta(step);
+
                     innerHTML += `
                         <div class="step-card" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid var(--shell-yellow); border-radius: 12px; padding: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 0.5rem;">
                                 <h4 style="margin: 0; color: var(--shell-red); font-size: 0.95rem; font-weight: 700;">Step ${step.step_number}: ${step.title}</h4>
-                                ${step.location ? `<span style="font-size: 0.75rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #64748b; font-weight: 600;">📍 ${step.location}</span>` : ''}
+                                <div class="step-citation-badge" title="Source Grounding">
+                                    <span>${stepMeta.icon}</span>
+                                    <span>${stepMeta.file_name}</span>
+                                    ${stepMeta.loc ? `<span class="citation-tag">${stepMeta.loc}</span>` : ''}
+                                </div>
                             </div>
                             <div class="step-description" style="font-size: 0.9rem; color: #334155; line-height: 1.5; margin-bottom: 0.75rem;">${stepDesc}</div>
                             ${step.image_base64 ? `
@@ -906,11 +1085,12 @@
             } else if (snapshots && snapshots.length > 0) {
                 innerHTML += `<div class="snapshots-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 0.75rem; margin-top: 1rem; width: 100%;">`;
                 snapshots.forEach(snap => {
+                    const snapMeta = getCitationMeta(snap);
                     if (snap.image_base64) {
                         innerHTML += `
                             <div class="snapshot-container" style="margin-top: 0; position: relative;">
                                 <img src="data:image/jpeg;base64,${snap.image_base64}" alt="Media Frame" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color);">
-                                <div class="timestamp-badge" style="position: absolute; bottom: 8px; right: 8px; background: rgba(15,23,42,0.85); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-family: monospace;">${formatTime(snap.timestamp)}</div>
+                                <div class="timestamp-badge" style="position: absolute; bottom: 8px; right: 8px; background: rgba(15,23,42,0.85); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-family: monospace;">${snapMeta.loc || formatTime(snap.timestamp)}</div>
                             </div>
                         `;
                     }
@@ -1040,6 +1220,7 @@
             const formData = new FormData();
             formData.append('question', q);
             formData.append('job_id', currentJobId);
+            formData.append('language', selectedLanguage);
 
             try {
                 const res = await fetch('/api/ask', {
@@ -1067,7 +1248,112 @@
                 questionInput.focus();
             }
         });
+
+        // ================= LANGUAGE SETTINGS & STATE =================
+        const currentLangText = document.getElementById('current-lang-text');
+        const openLangSettingsBtn = document.getElementById('open-lang-settings');
+        const langModal = document.getElementById('language-modal');
+        const closeLangModalBtn = document.getElementById('close-lang-modal');
+        const cancelLangBtn = document.getElementById('cancel-lang-btn');
+        const applyLangBtn = document.getElementById('apply-lang-btn');
+        const langGrid = document.getElementById('language-options-grid');
+
+        let tempSelectedLanguage = selectedLanguage;
+
+        function updateLangDisplay() {
+            const current = SUPPORTED_LANGUAGES.find(l => l.code.toLowerCase() === selectedLanguage.toLowerCase()) || SUPPORTED_LANGUAGES[0];
+            if (currentLangText) {
+                currentLangText.innerHTML = `${current.label} ${current.flag}`;
+            }
+        }
+        updateLangDisplay();
+
+        function renderLanguageModal() {
+            if (!langGrid) return;
+            langGrid.innerHTML = '';
+            SUPPORTED_LANGUAGES.forEach(lang => {
+                const card = document.createElement('div');
+                card.className = `lang-card ${lang.code.toLowerCase() === tempSelectedLanguage.toLowerCase() ? 'active' : ''}`;
+                card.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.35rem;">${lang.flag}</span>
+                        <div style="display: flex; flex-direction: column; text-align: left;">
+                            <span style="font-size: 0.9rem; font-weight: 700; color: #0f172a;">${lang.label}</span>
+                            <span style="font-size: 0.75rem; color: #64748b;">${lang.native}</span>
+                        </div>
+                    </div>
+                    <span class="lang-check" style="color: var(--shell-red); font-size: 1rem; font-weight: 800; ${lang.code.toLowerCase() === tempSelectedLanguage.toLowerCase() ? '' : 'visibility: hidden;'}">✓</span>
+                `;
+                card.addEventListener('click', () => {
+                    tempSelectedLanguage = lang.code;
+                    langGrid.querySelectorAll('.lang-card').forEach(c => {
+                        c.classList.remove('active');
+                        const check = c.querySelector('.lang-check');
+                        if (check) check.style.visibility = 'hidden';
+                    });
+                    card.classList.add('active');
+                    const check = card.querySelector('.lang-check');
+                    if (check) check.style.visibility = 'visible';
+                });
+                langGrid.appendChild(card);
+            });
+        }
+
+        if (openLangSettingsBtn) {
+            openLangSettingsBtn.addEventListener('click', () => {
+                tempSelectedLanguage = selectedLanguage;
+                renderLanguageModal();
+                if (langModal) langModal.style.display = 'flex';
+            });
+        }
+
+        function closeLanguageModal() {
+            if (langModal) langModal.style.display = 'none';
+        }
+
+        if (closeLangModalBtn) closeLangModalBtn.addEventListener('click', closeLanguageModal);
+        if (cancelLangBtn) cancelLangBtn.addEventListener('click', closeLanguageModal);
+
+        if (applyLangBtn) {
+            applyLangBtn.addEventListener('click', () => {
+                selectedLanguage = tempSelectedLanguage;
+                localStorage.setItem('app_output_language', selectedLanguage);
+                updateLangDisplay();
+                closeLanguageModal();
+            });
+        }
+
+        if (langModal) {
+            langModal.addEventListener('click', (e) => {
+                if (e.target === langModal) closeLanguageModal();
+            });
+        }
     </script>
+    </div>
+
+    <!-- Language Settings Modal Dialog -->
+    <div id="language-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.4rem;">⚙️</span>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #0f172a; font-weight: 700;">Output Language Settings</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #64748b;">AI answers and Azure Neural Voice will speak in your chosen language</p>
+                    </div>
+                </div>
+                <button type="button" id="close-lang-modal" class="icon-btn" style="border: none; font-size: 1.1rem; cursor: pointer; width: 30px; height: 30px; border-radius: 50%;">✕</button>
+            </div>
+            <div style="padding: 1.25rem 1.5rem; max-height: 60vh; overflow-y: auto; background: #ffffff;">
+                <div id="language-options-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem;">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                <button type="button" id="cancel-lang-btn" style="background: transparent; color: #64748b; border: 1px solid #cbd5e1; box-shadow: none; padding: 0.55rem 1.1rem;">Cancel</button>
+                <button type="button" id="apply-lang-btn" style="padding: 0.55rem 1.3rem;">Save & Apply</button>
+            </div>
+        </div>
     </div>
 </body>
 </html>

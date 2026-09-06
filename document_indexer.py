@@ -163,14 +163,62 @@ def extract_document_chunks(doc_id: str, file_path: str, display_name: str) -> l
                 elif source_type == "image":
                     location_label = f"Image: {display_name}"
 
-                chunks.append({
-                    "doc_id": doc_id,
-                    "display_name": display_name,
-                    "source_type": source_type,
-                    "location": location_label,
-                    "page_num": float(page_num),
-                    "text": page_text,
-                })
+                    chunks.append({
+                        "doc_id": doc_id,
+                        "display_name": display_name,
+                        "source_type": source_type,
+                        "location": location_label,
+                        "page_num": float(page_num),
+                        "text": page_text,
+                    })
+
+    # Index tabular data with precise row & column citations if tables exist
+    tables = analyze_result.get("tables", [])
+    if tables:
+        for t_idx, table in enumerate(tables):
+            row_count = table.get("rowCount", 0)
+            col_count = table.get("columnCount", 0)
+            cells = table.get("cells", [])
+            
+            # Identify page of the table
+            table_page = 1
+            if table.get("boundingRegions"):
+                table_page = table["boundingRegions"][0].get("pageNumber", 1)
+
+            # Reconstruct table rows
+            grid = {}
+            for cell in cells:
+                r = cell.get("rowIndex", 0)
+                c = cell.get("columnIndex", 0)
+                txt = cell.get("content", "").strip()
+                if r not in grid:
+                    grid[r] = {}
+                grid[r][c] = txt
+
+            # Build markdown table representation in blocks of up to 15 rows
+            row_stride = 15
+            for start_r in range(0, max(row_count, 1), row_stride):
+                end_r = min(start_r + row_stride, row_count)
+                row_lines = []
+                for r in range(start_r, end_r):
+                    cols = [grid.get(r, {}).get(c, "") for c in range(col_count)]
+                    row_lines.append(" | ".join(cols))
+                
+                table_text = "\n".join(row_lines)
+                if table_text.strip():
+                    if source_type == "xlsx":
+                        tbl_loc = f"Sheet (Rows {start_r + 1}-{end_r})"
+                    else:
+                        tbl_loc = f"Page {table_page} - Table (Rows {start_r + 1}-{end_r})"
+
+                    chunks.append({
+                        "doc_id": doc_id,
+                        "display_name": display_name,
+                        "source_type": source_type,
+                        "location": tbl_loc,
+                        "page_num": float(table_page),
+                        "text": f"Table data for {display_name} ({tbl_loc}):\n{table_text}",
+                    })
 
     # Fallback if pages structure was empty but full markdown exists
     if not chunks and markdown_content:

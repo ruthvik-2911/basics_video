@@ -13,15 +13,21 @@
     <style>
         :root {
             --bg-color: #f8fafc;
-            --panel-bg: rgba(255, 255, 255, 0.95);
-            --border-color: rgba(226, 232, 240, 0.9);
+            --panel-bg: rgba(255, 255, 255, 0.96);
+            --border-color: rgba(226, 232, 240, 0.85);
             --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --shell-red: #DD1D21;
-            --shell-red-hover: #c4181c;
-            --shell-yellow: #FFD500;
-            --accent-primary: #DD1D21;
-            --accent-hover: #c4181c;
+            --text-secondary: #475569;
+            
+            /* KPMG Corporate Brand Colors (Prism Palette) */
+            --kpmg-navy: #00338D;
+            --kpmg-navy-hover: #00225E;
+            --kpmg-blue: #005EB8;
+            --kpmg-cyan: #00A3E0;
+            --kpmg-purple: #7213EA;
+            --kpmg-magenta: #DE1B76;
+
+            --accent-primary: #00338D;
+            --accent-hover: #005EB8;
             --glass-blur: 16px;
             --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
@@ -33,8 +39,10 @@
             overflow: hidden;
             background: var(--bg-color);
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(255, 213, 0, 0.08), transparent 35%),
-                radial-gradient(circle at 90% 80%, rgba(221, 29, 33, 0.05), transparent 35%);
+                radial-gradient(circle at 8% 12%, rgba(0, 94, 184, 0.045), transparent 45%),
+                radial-gradient(circle at 92% 10%, rgba(0, 163, 224, 0.04), transparent 45%),
+                radial-gradient(circle at 85% 88%, rgba(114, 19, 234, 0.035), transparent 45%),
+                radial-gradient(circle at 12% 90%, rgba(222, 27, 118, 0.025), transparent 45%);
             color: var(--text-primary);
             font-family: var(--font-family);
         }
@@ -113,7 +121,7 @@
 
         .sidebar-toggle-handle:hover {
             background: #f8fafc;
-            color: var(--shell-red);
+            color: var(--kpmg-blue);
         }
 
         .container.sidebar-collapsed .sidebar-toggle-handle {
@@ -136,16 +144,16 @@
 
         .tab-btn:hover {
             background: #e2e8f0;
-            color: #0f172a;
+            color: var(--kpmg-navy);
             transform: none;
             box-shadow: none;
         }
 
         .tab-btn.active {
             background: #ffffff;
-            color: var(--shell-red);
-            border-color: var(--shell-red);
-            box-shadow: 0 2px 4px rgba(221, 29, 33, 0.1);
+            color: var(--kpmg-navy);
+            border-color: var(--kpmg-blue);
+            box-shadow: 0 2px 8px rgba(0, 94, 184, 0.12);
         }
 
         h2 {
@@ -180,8 +188,8 @@
         }
 
         input[type="text"]:focus, select:focus {
-            border-color: var(--shell-red);
-            box-shadow: 0 0 0 3px rgba(221, 29, 33, 0.12);
+            border-color: var(--kpmg-blue);
+            box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.12);
         }
 
         input[type="file"] {
@@ -191,7 +199,7 @@
         }
 
         button {
-            background: var(--shell-red);
+            background: linear-gradient(135deg, var(--kpmg-navy) 0%, var(--kpmg-blue) 100%);
             color: white;
             border: none;
             padding: 0.75rem 1.25rem;
@@ -200,13 +208,13 @@
             font-family: inherit;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(221, 29, 33, 0.25);
+            box-shadow: 0 4px 14px rgba(0, 51, 141, 0.2);
         }
 
         button:hover {
-            background: var(--shell-red-hover);
+            background: linear-gradient(135deg, var(--kpmg-navy-hover) 0%, #004d99 100%);
             transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(221, 29, 33, 0.35);
+            box-shadow: 0 6px 18px rgba(0, 51, 141, 0.3);
         }
 
         button:active {
@@ -228,7 +236,7 @@
             background: #ffffff;
             border-radius: 10px;
             border: 1px solid var(--border-color);
-            border-left: 4px solid var(--shell-yellow);
+            border-left: 4px solid var(--kpmg-cyan);
         }
 
         .status-badge {
@@ -244,8 +252,8 @@
 
         .status-idle { background: #e2e8f0; color: #475569; }
         .status-queued { background: #fef3c7; color: #92400e; }
-        .status-running { background: #fee2e2; color: #b91c1c; animation: pulse 2s infinite; }
-        .status-done { background: #dcfce7; color: #15803d; }
+        .status-running { background: #e0f2fe; color: #0284c7; animation: pulse 2s infinite; }
+        .status-done { background: #e0f7fa; color: #00838f; }
         .status-error { background: #fee2e2; color: #b91c1c; }
 
         @keyframes pulse {
@@ -323,7 +331,7 @@
         }
 
         .message.user .bubble {
-            background: linear-gradient(135deg, var(--shell-red) 0%, #c4181c 100%);
+            background: linear-gradient(135deg, var(--kpmg-navy) 0%, var(--kpmg-blue) 100%);
             color: white;
             border-bottom-right-radius: 4px;
         }
@@ -406,8 +414,8 @@
         }
 
         .chat-input-area input:focus {
-            border-color: var(--shell-red);
-            box-shadow: 0 0 0 3px rgba(221, 29, 33, 0.12);
+            border-color: var(--kpmg-blue);
+            box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.12);
         }
 
         .chat-input-area input:disabled {
@@ -462,10 +470,10 @@
         }
 
         .sidebar-settings-bar:hover {
-            border-color: var(--shell-red);
-            background: #fffafa;
+            border-color: var(--kpmg-blue);
+            background: #f0f7ff;
             transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(221, 29, 33, 0.08);
+            box-shadow: 0 4px 10px rgba(0, 94, 184, 0.08);
         }
 
         .gear-spin {
@@ -528,9 +536,9 @@
         }
 
         .lang-card.active {
-            border-color: var(--shell-red);
-            background: #fef2f2;
-            box-shadow: 0 0 0 2px rgba(221, 29, 33, 0.15);
+            border-color: var(--kpmg-blue);
+            background: #f0f7ff;
+            box-shadow: 0 0 0 2px rgba(0, 94, 184, 0.15);
         }
 
         .citation-pill {
@@ -553,9 +561,9 @@
         }
 
         .citation-tag {
-            color: var(--shell-red);
+            color: var(--kpmg-navy);
             font-weight: 700;
-            background: #fee2e2;
+            background: #e0f2fe;
             padding: 2px 6px;
             border-radius: 4px;
             font-family: monospace;
@@ -580,7 +588,8 @@
     <div style="width: 100%; height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
         <!-- Professional Clean Header Bar -->
         <header style="width: 100%; height: 56px; background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 0 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: center; position: relative; box-sizing: border-box; flex-shrink: 0;">
-            <h1 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #0f172a; letter-spacing: -0.2px; text-align: center;">Universal Knowledge Assistant</h1>
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #00338D 0%, #005EB8 25%, #00A3E0 50%, #7213EA 75%, #DE1B76 100%);"></div>
+            <h1 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--kpmg-navy); letter-spacing: -0.2px; text-align: center;">Universal Knowledge Assistant</h1>
         </header>
 
         <div class="container">
@@ -635,7 +644,7 @@
                         <span class="gear-spin">⚙️</span>
                         <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.2;">
                             <span style="font-size: 0.72rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Output Language</span>
-                            <span id="current-lang-text" style="font-size: 0.88rem; font-weight: 700; color: var(--shell-red);">English 🇺🇸</span>
+                            <span id="current-lang-text" style="font-size: 0.88rem; font-weight: 700; color: var(--kpmg-blue);">English 🇺🇸</span>
                         </div>
                     </div>
                     <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 600;">Edit ›</span>
@@ -648,7 +657,7 @@
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
                 <h2 style="margin: 0;">Insight Playground</h2>
                 <div style="display: flex; gap: 0.5rem;">
-                    <button id="new-chat-btn" title="Start a fresh chat thread" class="tab-btn" style="background: #ffffff; border: 1px solid #cbd5e1; color: var(--shell-red); font-weight: 600;">+ New Chat</button>
+                    <button id="new-chat-btn" title="Start a fresh chat thread" class="tab-btn" style="background: #ffffff; border: 1px solid #cbd5e1; color: var(--kpmg-navy); font-weight: 600;">+ New Chat</button>
                     <button id="view-chat-tab" class="tab-btn active">💬 Insight Chat</button>
                     <button id="view-graph-tab" class="tab-btn">🕸️ Knowledge Graph</button>
                 </div>
@@ -678,8 +687,12 @@
             <!-- KNOWLEDGE GRAPH VIEW CONTAINER -->
             <div id="graph-view" style="display: none; flex: 1; min-height: 0; width: 100%; border-radius: 12px; background: #ffffff; border: 1px solid #cbd5e1; position: relative; overflow: hidden;">
                 <div id="graph-canvas" style="width: 100%; height: 100%;"></div>
-                <div style="position: absolute; bottom: 12px; left: 12px; background: rgba(255,255,255,0.92); padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; border: 1px solid #cbd5e1; color: #475569; pointer-events: none; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
-                    🔴 Red: Videos &nbsp;|&nbsp; 🔵 Blue: Topics &nbsp;|&nbsp; 🟢 Green: Tools &nbsp;|&nbsp; 🟡 Yellow: Actions
+                <div style="position: absolute; bottom: 12px; left: 12px; background: rgba(255,255,255,0.95); padding: 7px 14px; border-radius: 8px; font-size: 0.75rem; border: 1px solid #cbd5e1; color: #334155; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 12px; font-weight: 500;">
+                    <span><strong style="color: #00338D; font-size: 0.85rem;">■</strong> Navy: Files & Media</span>
+                    <span><strong style="color: #005EB8; font-size: 0.85rem;">■</strong> Blue: Topics</span>
+                    <span><strong style="color: #00A3E0; font-size: 0.85rem;">■</strong> Cyan: Tools</span>
+                    <span><strong style="color: #7213EA; font-size: 0.85rem;">■</strong> Purple: Concepts</span>
+                    <span><strong style="color: #DE1B76; font-size: 0.85rem;">■</strong> Magenta: Actions</span>
                 </div>
             </div>
         </div>
@@ -800,26 +813,80 @@
                 const canvasContainer = document.getElementById('graph-canvas');
                 if (!canvasContainer) return;
 
+                // Color mappings matching KPMG Prism palette
+                const kpmgPrismMap = {
+                    video: { bg: "#00338D", border: "#00225E", hl: "#005EB8", text: "#ffffff" },
+                    document: { bg: "#00338D", border: "#00225E", hl: "#005EB8", text: "#ffffff" },
+                    topic: { bg: "#EBF3FC", border: "#005EB8", hl: "#ffffff", text: "#00338D" },
+                    tool: { bg: "#E0F7FA", border: "#00A3E0", hl: "#ffffff", text: "#007799" },
+                    setting: { bg: "#F3E8FF", border: "#7213EA", hl: "#ffffff", text: "#5E17EB" },
+                    action: { bg: "#FCE4EC", border: "#DE1B76", hl: "#ffffff", text: "#C2185B" }
+                };
+
+                const styledNodes = (graphData.nodes || []).map(n => {
+                    const grp = (n.group || 'topic').toLowerCase();
+                    const isRoot = grp === 'video' || grp === 'document' || (n.id || '').startsWith('video_') || (n.id || '').startsWith('doc_');
+                    const c = isRoot ? kpmgPrismMap.video : (kpmgPrismMap[grp] || kpmgPrismMap.topic);
+
+                    return {
+                        ...n,
+                        shape: isRoot ? 'hexagon' : 'box',
+                        color: {
+                            background: c.bg,
+                            border: c.border,
+                            highlight: {
+                                background: isRoot ? '#005EB8' : '#ffffff',
+                                border: isRoot ? '#00A3E0' : '#005EB8'
+                            },
+                            hover: {
+                                background: isRoot ? '#005EB8' : '#ffffff',
+                                border: isRoot ? '#00A3E0' : '#00A3E0'
+                            }
+                        },
+                        font: {
+                            color: c.text,
+                            face: 'Inter, sans-serif',
+                            size: isRoot ? 14 : 12,
+                            bold: isRoot
+                        },
+                        borderWidth: 2,
+                        shadow: {
+                            enabled: true,
+                            color: 'rgba(0, 51, 141, 0.08)',
+                            size: 6,
+                            x: 0,
+                            y: 2
+                        }
+                    };
+                });
+
+                const styledEdges = (graphData.edges || []).map(e => ({
+                    ...e,
+                    width: 1.6,
+                    color: {
+                        color: '#cbd5e1',
+                        highlight: '#005EB8',
+                        hover: '#00A3E0'
+                    },
+                    font: {
+                        color: '#64748b',
+                        size: 10,
+                        face: 'Inter, sans-serif'
+                    }
+                }));
+
                 const data = {
-                    nodes: new vis.DataSet(graphData.nodes || []),
-                    edges: new vis.DataSet(graphData.edges || [])
+                    nodes: new vis.DataSet(styledNodes),
+                    edges: new vis.DataSet(styledEdges)
                 };
 
                 const options = {
-                    nodes: {
-                        borderWidth: 2,
-                        shadow: true
-                    },
-                    edges: {
-                        width: 1.5,
-                        shadow: false,
-                        smooth: { type: 'continuous' }
-                    },
                     physics: {
                         stabilization: true,
                         barnesHut: {
-                            gravitationalConstant: -3000,
-                            springLength: 120
+                            gravitationalConstant: -3500,
+                            springLength: 130,
+                            springConstant: 0.04
                         }
                     },
                     interaction: {
@@ -1087,9 +1154,9 @@
                     const stepMeta = getCitationMeta(step);
 
                     innerHTML += `
-                        <div class="step-card" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid var(--shell-yellow); border-radius: 12px; padding: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                        <div class="step-card" style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid var(--kpmg-blue); border-radius: 12px; padding: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
                             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 0.5rem;">
-                                <h4 style="margin: 0; color: var(--shell-red); font-size: 0.95rem; font-weight: 700;">Step ${step.step_number}: ${step.title}</h4>
+                                <h4 style="margin: 0; color: var(--kpmg-navy); font-size: 0.95rem; font-weight: 700;">Step ${step.step_number}: ${step.title}</h4>
                                 <div class="step-citation-badge" title="Source Grounding">
                                     <span>${stepMeta.icon}</span>
                                     <span>${stepMeta.file_name}</span>
@@ -1307,7 +1374,7 @@
                             <span style="font-size: 0.75rem; color: #64748b;">${lang.native}</span>
                         </div>
                     </div>
-                    <span class="lang-check" style="color: var(--shell-red); font-size: 1rem; font-weight: 800; ${lang.code.toLowerCase() === tempSelectedLanguage.toLowerCase() ? '' : 'visibility: hidden;'}">✓</span>
+                    <span class="lang-check" style="color: var(--kpmg-navy); font-size: 1rem; font-weight: 800; ${lang.code.toLowerCase() === tempSelectedLanguage.toLowerCase() ? '' : 'visibility: hidden;'}">✓</span>
                 `;
                 card.addEventListener('click', () => {
                     tempSelectedLanguage = lang.code;

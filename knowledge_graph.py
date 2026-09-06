@@ -76,15 +76,19 @@ def extract_and_merge(video_id: str, video_title: str, chunks: list) -> dict:
     nodes_dict = {n["id"]: n for n in graph.get("nodes", [])}
     edges_list = graph.get("edges", [])
 
-    # Add/Update root video node
+    # Add/Update root video/document node with KPMG Navy / Royal Blue
     nodes_dict[video_node_id] = {
         "id": video_node_id,
         "label": video_title,
         "group": "video",
         "shape": "hexagon",
-        "color": {"background": "#DD1D21", "border": "#b91c1c", "highlight": {"background": "#FFD500", "border": "#DD1D21"}},
+        "color": {
+            "background": "#00338D",
+            "border": "#00225E",
+            "highlight": {"background": "#005EB8", "border": "#00A3E0"}
+        },
         "font": {"color": "#ffffff", "face": "Inter", "size": 14},
-        "title": f"Video: {video_title}"
+        "title": f"Source: {video_title}"
     }
 
     # Aggregate transcript text from chunks (up to 3000 chars)
@@ -120,12 +124,12 @@ def extract_and_merge(video_id: str, video_title: str, chunks: list) -> dict:
         entities = data.get("entities", [])
         relationships = data.get("relationships", [])
 
-        # Color mapping for entity groups
+        # Color mapping for entity groups based on KPMG Prism Palette
         group_colors = {
-            "topic": {"bg": "#eff6ff", "border": "#3b82f6", "text": "#1d4ed8"},
-            "tool": {"bg": "#f0fdf4", "border": "#22c55e", "text": "#15803d"},
-            "action": {"bg": "#fef3c7", "border": "#f59e0b", "text": "#b45309"},
-            "setting": {"bg": "#f3e8ff", "border": "#a855f7", "text": "#6b21a8"}
+            "topic": {"bg": "#EBF3FC", "border": "#005EB8", "text": "#00338D"},       # KPMG Royal Blue
+            "tool": {"bg": "#E0F7FA", "border": "#00A3E0", "text": "#007799"},        # KPMG Cyan
+            "action": {"bg": "#FCE4EC", "border": "#DE1B76", "text": "#AD1457"},      # KPMG Magenta
+            "setting": {"bg": "#F3E8FF", "border": "#7213EA", "text": "#4A148C"}      # KPMG Violet/Purple
         }
 
         # Add entities to nodes
@@ -147,7 +151,7 @@ def extract_and_merge(video_id: str, video_title: str, chunks: list) -> dict:
                     "color": {
                         "background": colors["bg"],
                         "border": colors["border"],
-                        "highlight": {"background": "#ffffff", "border": "#DD1D21"}
+                        "highlight": {"background": "#ffffff", "border": "#005EB8"}
                     },
                     "font": {"color": colors["text"], "face": "Inter", "size": 13},
                     "title": f"Category: {cat.capitalize()}"
@@ -161,7 +165,7 @@ def extract_and_merge(video_id: str, video_title: str, chunks: list) -> dict:
                     "from": video_node_id,
                     "to": node_id,
                     "label": "covers",
-                    "color": {"color": "#cbd5e1", "highlight": "#DD1D21"},
+                    "color": {"color": "#cbd5e1", "highlight": "#005EB8"},
                     "font": {"size": 10, "color": "#64748b"}
                 })
 

@@ -30,11 +30,14 @@ def _get_client() -> AzureOpenAI:
 def call_vision_model(context_text: str, frame_paths: list[str], question: str, language: str = "English") -> str:
     is_multi_frame = len(frame_paths) > 1
 
-    lang_instruction = ""
-    if language and language.lower() != "english":
-        lang_instruction = f"\n\nCRITICAL LANGUAGE INSTRUCTION: You MUST output all response text, summaries, step titles, and explanations in {language}. Keep JSON structure keys unchanged, but translate all values into {language}."
-
     if is_multi_frame:
+        lang_instruction = ""
+        if language and language.lower() != "english":
+            lang_instruction = (
+                f"\n\nCRITICAL MULTILINGUAL INSTRUCTION: You MUST write the 'summary', all step 'title's, and all step 'description's in fluent, natural {language}. "
+                "Keep the JSON keys in English ('summary', 'steps', 'step_number', 'title', 'description'), but translate all value contents into rich, fluent {language}."
+            )
+
         prompt = (
             "You are providing a step-by-step overview of a video or document collection using "
             f"{len(frame_paths)} keyframe snapshots/images (ordered chronologically as Image 1, Image 2, etc.) "
@@ -43,12 +46,12 @@ def call_vision_model(context_text: str, frame_paths: list[str], question: str, 
             f"User question: {question}\n\n"
             "Return a JSON object with this EXACT structure:\n"
             "{\n"
-            '  "summary": "Brief overall summary",\n'
+            '  "summary": "Brief overall summary in markdown",\n'
             '  "steps": [\n'
             '    {\n'
             '      "step_number": 1,\n'
             '      "title": "Title for Step 1",\n'
-            '      "description": "Explanation for Step 1 based on Image 1 and context"\n'
+            '      "description": "Clear explanation for Step 1 based on Image 1 and context"\n'
             "    }\n"
             "  ]\n"
             "}\n\n"
@@ -56,12 +59,27 @@ def call_vision_model(context_text: str, frame_paths: list[str], question: str, 
             f"{lang_instruction}"
         )
     else:
+        lang_instruction = ""
+        if language and language.lower() != "english":
+            lang_instruction = (
+                f"\n\nCRITICAL LANGUAGE & FORMATTING RULES:\n"
+                f"1. Language: Answer entirely in natural, fluent {language}.\n"
+                "2. NO JSON: Do NOT output JSON, JSON keys, quotes around the answer, or curly braces. Output clean Markdown directly.\n"
+                "3. Beautiful Structure: Structure your response cleanly using rich Markdown. Start with a direct introductory summary sentence, use bold highlights (e.g. **important point**), and use clean bullet points or numbered lists for readability just like professional documentation."
+            )
+        else:
+            lang_instruction = (
+                "\n\nFORMATTING RULES:\n"
+                "- Structure your response cleanly using rich Markdown: start with a direct concise statement, use bold highlights and clear bullet points or numbered lists where appropriate for readability.\n"
+                "- Do NOT output JSON or curly braces."
+            )
+
         prompt = (
-            "You are answering a question about a video or document, using an exact frame snapshot "
+            "You are an expert AI assistant answering a question about a video, document, or knowledge library, using an exact frame snapshot "
             "or document page context.\n\n"
             f"Context:\n{context_text}\n\n"
             f"User question: {question}\n\n"
-            "Answer clearly and directly. Ground your answer in what's visible in the frame "
+            "Answer clearly, thoroughly, and directly. Ground your answer in what's visible in the frame "
             "and what's said/shown in the context. If the context doesn't actually answer the question, say so."
             f"{lang_instruction}"
         )

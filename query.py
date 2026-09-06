@@ -54,6 +54,41 @@ def _grab_exact_frame(video_blob_name: str, timestamp_seconds: float) -> str:
         return None
 
 
+def _clean_answer_text(raw_text: str) -> str:
+    if not raw_text or not isinstance(raw_text, str):
+        return ""
+    text = raw_text.strip()
+
+    # Strip code block wrappers like ```json ... ``` or ```markdown ... ```
+    if text.startswith("```"):
+        first_newline = text.find("\n")
+        if first_newline != -1 and text.endswith("```"):
+            text = text[first_newline + 1:-3].strip()
+
+    # If the response was wrapped in a JSON object, safely extract its primary content
+    if text.startswith("{") and text.endswith("}"):
+        try:
+            parsed = json.loads(text)
+            if isinstance(parsed, dict):
+                for key in ["answer", "summary", "response", "text", "description"]:
+                    if key in parsed and isinstance(parsed[key], str) and parsed[key].strip():
+                        return parsed[key].strip()
+                if "steps" in parsed and isinstance(parsed["steps"], list):
+                    parts = []
+                    if "summary" in parsed:
+                        parts.append(str(parsed["summary"]))
+                    for s in parsed["steps"]:
+                        if isinstance(s, dict):
+                            stitle = s.get("title", "")
+                            sdesc = s.get("description", "")
+                            parts.append(f"**{stitle}**\n{sdesc}")
+                    return "\n\n".join(parts).strip()
+        except Exception:
+            pass
+
+    return text
+
+
 def _is_summary_query(question: str) -> bool:
     q = question.lower()
     keywords = [
@@ -270,7 +305,8 @@ def answer_question(question: str, video_blob_name: str = None, video_id: str = 
             "citation_badge": best_badge,
         }]
         
-        answer_text = call_vision_model(context_text, [path] if path else [], question, language=language)
+        raw_answer = call_vision_model(context_text, [path] if path else [], question, language=language)
+        answer_text = _clean_answer_text(raw_answer)
 
     # Return standard fields for backward compatibility, plus citations & full structured steps
     return {

@@ -326,8 +326,47 @@
             padding: 1rem 1.25rem;
             border-radius: 16px;
             font-size: 0.95rem;
-            line-height: 1.5;
+            line-height: 1.6;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            word-break: break-word;
+        }
+
+        .bubble p {
+            margin-top: 0;
+            margin-bottom: 0.65rem;
+        }
+
+        .bubble p:last-child {
+            margin-bottom: 0;
+        }
+
+        .bubble ul, .bubble ol {
+            margin: 0.5rem 0 0.75rem 1.25rem;
+            padding: 0;
+        }
+
+        .bubble li {
+            margin-bottom: 0.4rem;
+            line-height: 1.6;
+        }
+
+        .bubble strong {
+            color: var(--kpmg-navy);
+            font-weight: 700;
+        }
+
+        .message.user .bubble strong {
+            color: #ffffff;
+        }
+
+        .bubble h1, .bubble h2, .bubble h3, .bubble h4 {
+            margin: 0.6rem 0 0.4rem 0;
+            color: var(--kpmg-navy);
+            font-weight: 700;
+        }
+
+        .message.user .bubble h1, .message.user .bubble h2, .message.user .bubble h3, .message.user .bubble h4 {
+            color: #ffffff;
         }
 
         .message.user .bubble {
@@ -988,6 +1027,47 @@
         let currentlySpeakingBtn = null;
         let currentAudio = null;
 
+        // Helper to unwrap any accidental JSON string or code fence into clean formatted text
+        function unwrapContent(val) {
+            if (!val || typeof val !== 'string') return val || '';
+            let s = val.trim();
+            // Remove markdown code fences if wrapped
+            if (s.startsWith('```')) {
+                const idx = s.indexOf('\n');
+                if (idx !== -1 && s.endsWith('```')) {
+                    s = s.substring(idx + 1, s.length - 3).trim();
+                }
+            }
+            if (s.startsWith('{') && s.endsWith('}')) {
+                try {
+                    const parsed = JSON.parse(s);
+                    if (parsed.answer && typeof parsed.answer === 'string') return parsed.answer.trim();
+                    if (parsed.summary && typeof parsed.summary === 'string') return parsed.summary.trim();
+                    if (parsed.response && typeof parsed.response === 'string') return parsed.response.trim();
+                    if (parsed.text && typeof parsed.text === 'string') return parsed.text.trim();
+                    if (Array.isArray(parsed.steps)) {
+                        let out = parsed.summary ? `${parsed.summary}\n\n` : '';
+                        out += parsed.steps.map(st => `**${st.title || 'Step ' + st.step_number}**\n${st.description || ''}`).join('\n\n');
+                        return out.trim();
+                    }
+                } catch (e) {}
+            }
+            return s;
+        }
+
+        // Clean text for speech synthesis so markdown syntax isn't read aloud
+        function cleanTextForSpeech(raw) {
+            let t = unwrapContent(raw);
+            t = t.replace(/#{1,6}\s+/g, '')
+                 .replace(/\*\*([^*]+)\*\*/g, '$1')
+                 .replace(/\*([^*]+)\*/g, '$1')
+                 .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                 .replace(/`([^`]+)`/g, '$1')
+                 .replace(/^[*-]\s+/gm, '')
+                 .replace(/^\d+\.\s+/gm, '');
+            return t.trim();
+        }
+
         // Text-to-Speech Helper using Azure Neural Voice
         async function speak(text, button = null, isAuto = false) {
             if (isAuto && !ttsToggle.checked) return;
@@ -1029,9 +1109,18 @@
                 button.title = 'Stop reading';
             }
 
+            const speechText = cleanTextForSpeech(text);
+            if (!speechText) {
+                if (button) {
+                    button.innerText = '🔊';
+                    currentlySpeakingBtn = null;
+                }
+                return;
+            }
+
             try {
                 const formData = new FormData();
-                formData.append('text', text);
+                formData.append('text', speechText);
                 formData.append('language', selectedLanguage);
 
                 const res = await fetch('/api/tts', {
@@ -1073,7 +1162,7 @@
             } catch (err) {
                 console.warn("Azure TTS fallback to Web Speech API", err);
                 if (currentlySpeakingBtn === button) {
-                    const utterance = new SpeechSynthesisUtterance(text);
+                    const utterance = new SpeechSynthesisUtterance(speechText);
                     if (button) {
                         utterance.onend = () => {
                             if (currentlySpeakingBtn === button) {
@@ -1125,10 +1214,11 @@
         }
 
         function appendMessage(role, text, imageB64 = null, timestamp = null, snapshots = null, structuredSteps = null, citations = null) {
+            const cleanText = unwrapContent(text);
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${role}`;
             
-            const parsedText = window.marked ? marked.parse(text) : text;
+            const parsedText = window.marked ? marked.parse(cleanText) : cleanText;
             let innerHTML = `<div class="bubble">${parsedText}</div>`;
             
             // Precision Citations Pill Container
@@ -1201,7 +1291,7 @@
             if (role === 'bot') {
                 innerHTML += `
                     <div class="message-actions">
-                        <button type="button" class="icon-btn play-audio-btn" title="Replay answer" data-text="${text.replace(/"/g, '&quot;')}">
+                        <button type="button" class="icon-btn play-audio-btn" title="Replay answer" data-text="${cleanText.replace(/"/g, '&quot;')}">
                             🔊
                         </button>
                     </div>
@@ -1324,10 +1414,11 @@
                 typingIndicator.style.display = 'none';
                 
                 if (res.ok) {
-                    appendMessage('bot', data.text, data.image_base64, data.timestamp, data.snapshots, data.structured_steps, data.citations);
+                    const cleanBotText = unwrapContent(data.text);
+                    appendMessage('bot', cleanBotText, data.image_base64, data.timestamp, data.snapshots, data.structured_steps, data.citations);
                     const lastBotMsg = chatHistory.querySelector('.message.bot:last-child');
                     const playBtn = lastBotMsg ? lastBotMsg.querySelector('.play-audio-btn') : null;
-                    speak(data.text, playBtn, true);
+                    speak(cleanBotText, playBtn, true);
                 } else {
                     appendMessage('bot', "Sorry, I encountered an error answering that.");
                 }

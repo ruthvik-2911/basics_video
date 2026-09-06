@@ -685,6 +685,31 @@
         </div>
     </div>
 
+    <!-- Language Settings Modal Dialog -->
+    <div id="language-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.4rem;">⚙️</span>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #0f172a; font-weight: 700;">Output Language Settings</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #64748b;">AI answers and Azure Neural Voice will speak in your chosen language</p>
+                    </div>
+                </div>
+                <button type="button" id="close-lang-modal" class="icon-btn" style="border: none; font-size: 1.1rem; cursor: pointer; width: 30px; height: 30px; border-radius: 50%;">✕</button>
+            </div>
+            <div style="padding: 1.25rem 1.5rem; max-height: 60vh; overflow-y: auto; background: #ffffff;">
+                <div id="language-options-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem;">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                <button type="button" id="cancel-lang-btn" style="background: transparent; color: #64748b; border: 1px solid #cbd5e1; box-shadow: none; padding: 0.55rem 1.1rem;">Cancel</button>
+                <button type="button" id="apply-lang-btn" style="padding: 0.55rem 1.3rem;">Save & Apply</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Floating Edge Toggle Handle Script
         const container = document.querySelector('.container');
@@ -1329,31 +1354,6 @@
             });
         }
     </script>
-    </div>
-
-    <!-- Language Settings Modal Dialog -->
-    <div id="language-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-box">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.4rem;">⚙️</span>
-                    <div>
-                        <h3 style="margin: 0; font-size: 1.1rem; color: #0f172a; font-weight: 700;">Output Language Settings</h3>
-                        <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #64748b;">AI answers and Azure Neural Voice will speak in your chosen language</p>
-                    </div>
-                </div>
-                <button type="button" id="close-lang-modal" class="icon-btn" style="border: none; font-size: 1.1rem; cursor: pointer; width: 30px; height: 30px; border-radius: 50%;">✕</button>
-            </div>
-            <div style="padding: 1.25rem 1.5rem; max-height: 60vh; overflow-y: auto; background: #ffffff;">
-                <div id="language-options-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem;">
-                    <!-- Populated dynamically via JS -->
-                </div>
-            </div>
-            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid #e2e8f0;">
-                <button type="button" id="cancel-lang-btn" style="background: transparent; color: #64748b; border: 1px solid #cbd5e1; box-shadow: none; padding: 0.55rem 1.1rem;">Cancel</button>
-                <button type="button" id="apply-lang-btn" style="padding: 0.55rem 1.3rem;">Save & Apply</button>
-            </div>
-        </div>
     </div>
 </body>
 </html>

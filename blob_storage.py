@@ -14,11 +14,16 @@ def _get_service() -> BlobServiceClient:
     return _blob_service
 
 
-def upload_raw_video(local_path: str, blob_name: str) -> str:
+def upload_blob(local_path: str, blob_name: str) -> str:
+    """Uploads a raw file (document, video, audio, image) to Azure Blob Storage raw container."""
     client = _get_service().get_blob_client(config.BLOB_CONTAINER_RAW_VIDEOS, blob_name)
     with open(local_path, "rb") as f:
         client.upload_blob(f, overwrite=True, max_concurrency=4)
     return client.url
+
+
+def upload_raw_video(local_path: str, blob_name: str) -> str:
+    return upload_blob(local_path, blob_name)
 
 
 def get_blob_sas_url(blob_name: str) -> str:
